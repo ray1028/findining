@@ -7,11 +7,9 @@ import {
 } from "react-native";
 import { Input } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { connect } from "react-redux";
 
-const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+const LoginForm = props => {
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.formContainer}>
       <Input
@@ -28,7 +26,7 @@ const LoginForm = () => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        onChangeText={text => setEmail(text)}
+        onChangeText={props.changeEmailInput}
       />
       <Input
         placeholder="Password"
@@ -44,13 +42,18 @@ const LoginForm = () => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        onChangeText={text => setPassword(text)}
+        onChangeText={props.changePasswordInput}
       />
       <TouchableOpacity
         activeOpacity={0.2}
         style={styles.submitButton}
         onPress={() =>
-          console.log("useremail is " + email + " userpassword is " + password)
+          console.log(
+            "useremail is " +
+              props.userEmail +
+              " userpassword is " +
+              props.userPassword
+          )
         }
       >
         <Text style={styles.submitText}>Login</Text>
@@ -59,7 +62,25 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+const mapStateToProps = state => {
+  return {
+    userEmail: state.loginCredentials.userEmail || "",
+    userPassword: state.loginCredentials.userPassword || ""
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    changeEmailInput: email => dispatch({ type: "SET_EMAIL", email }),
+    changePasswordInput: password =>
+      dispatch({ type: "SET_PASSWORD", password })
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LoginForm);
 
 const styles = StyleSheet.create({
   formContainer: {
