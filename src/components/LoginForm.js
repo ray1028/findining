@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  KeyboardAvoidingView
+  // KeyboardAvoidingView,
+  View,
+  Image,
+  TouchableWithoutFeedback
 } from "react-native";
 import { Input } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -11,7 +14,8 @@ import { connect } from "react-redux";
 
 const LoginForm = props => {
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.formContainer}>
+    <View style={styles.formContainer}>
+      <Image style={styles.logo} source={require("../images/findining.png")} />
       <Input
         placeholder="Email"
         autoCorrect={false}
@@ -56,9 +60,18 @@ const LoginForm = props => {
           )
         }
       >
-        <Text style={styles.submitText}>Login</Text>
+        <Text style={styles.submitText}>Sign in</Text>
       </TouchableOpacity>
-    </KeyboardAvoidingView>
+
+      <View style={styles.signupContainer}>
+        <Text style={styles.signupText}>
+          Dont have an account?
+          <TouchableWithoutFeedback>
+            <Text style={styles.signup}> Sign up now</Text>
+          </TouchableWithoutFeedback>
+        </Text>
+      </View>
+    </View>
   );
 };
 
@@ -86,7 +99,8 @@ const styles = StyleSheet.create({
   formContainer: {
     paddingTop: 23,
     width: "100%",
-    justifyContent: "center"
+    justifyContent: "center",
+    alignItems: "center"
   },
   iconTextContainer: {
     flex: 1,
@@ -112,8 +126,25 @@ const styles = StyleSheet.create({
   submitText: {
     color: "white"
   },
+  logo: {
+    width: 120,
+    height: 100
+  },
   inputBox: {
     margin: 20,
     width: "80%"
+  },
+  signupContainer: {
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  signupText: {
+    color: "#7a42f4"
+  },
+  signup: {
+    fontWeight: "bold",
+    fontStyle: "italic",
+    textDecorationLine: "underline",
+    color: "white"
   }
 });
