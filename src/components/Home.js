@@ -11,7 +11,7 @@ const Home = props => {
       />
       <Button
         title="SIGNUP"
-        onPress={() => props.navigation.navigate("SignOut")}
+        onPress={() => props.navigation.navigate("Signup")}
       />
     </View>
   );

@@ -51,14 +51,7 @@ const LoginForm = props => {
       <TouchableOpacity
         activeOpacity={0.2}
         style={styles.submitButton}
-        onPress={() =>
-          console.log(
-            "useremail is " +
-              props.userEmail +
-              " userpassword is " +
-              props.userPassword
-          )
-        }
+        onPress={() => props.navigation.navigate("TabNavigator")}
       >
         <Text style={styles.submitText}>Sign in</Text>
       </TouchableOpacity>
@@ -66,7 +59,9 @@ const LoginForm = props => {
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>
           Dont have an account?
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() => props.navigation.navigate("Signup")}
+          >
             <Text style={styles.signup}> Sign up now</Text>
           </TouchableWithoutFeedback>
         </Text>

@@ -2,10 +2,10 @@ import React from "react";
 import LoginForm from "./LoginForm";
 import FormWrap from "./FormWrap";
 
-const LoginPage = () => {
+const LoginPage = props => {
   return (
     <FormWrap>
-      <LoginForm />
+      <LoginForm navigation={props.navigation} />
     </FormWrap>
   );
 };
