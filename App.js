@@ -14,7 +14,8 @@ import Home from "./src/components/Home";
 import MainScreen from "./src/components/MainScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { YellowBox } from "react-native";
-YellowBox.ignoreWarnings(["Remote debugger"]);
+import RequestModal from "./src/components/RequestModal";
+// YellowBox.ignoreWarnings(["Remote debugger"]);
 
 // bottom tab routes here may wanna moduliza later
 const TabNavigator = createMaterialBottomTabNavigator(
@@ -111,7 +112,8 @@ class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <AppNavigator />
+        {/* <AppNavigator /> */}
+        <RequestModal />
       </Provider>
     );
   }
