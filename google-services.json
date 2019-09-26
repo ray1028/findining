@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "922514402045",
+    "firebase_url": "https://findining-1511b.firebaseio.com",
+    "project_id": "findining-1511b",
+    "storage_bucket": "findining-1511b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922514402045:android:2e1a7df24bd49c27f86c94",
+        "android_client_info": {
+          "package_name": "com.findining"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "922514402045-05aharcfutve46qci6btdbt16dhq8qd6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPcrMNBCIvZ7lGezbeWp5fVkieWoNuiII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "922514402045-05aharcfutve46qci6btdbt16dhq8qd6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
