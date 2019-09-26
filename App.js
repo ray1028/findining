@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Text } from "react-native";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
@@ -7,10 +8,9 @@ import { createMaterialBottomTabNavigator } from "react-navigation-material-bott
 import { createStackNavigator } from "react-navigation-stack";
 import Signup from "./src/components/Signup";
 import Home from "./src/components/Home";
+import TextCamera from "./src/components/TextCamera";
 import MainScreen from "./src/components/MainScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { YellowBox } from "react-native";
-YellowBox.ignoreWarnings(["Remote debugger"]);
 
 // bottom tab routes here may wanna moduliza later
 const TabNavigator = createMaterialBottomTabNavigator(
@@ -27,7 +27,7 @@ const TabNavigator = createMaterialBottomTabNavigator(
       }
     },
     Camera: {
-      screen: Home,
+      screen: TextCamera,
       navigationOption: {
         tabBarLabel: "Camera",
         tabBarIcon: ({ focused }) => (
@@ -91,10 +91,8 @@ const signupStateReducer = (state, action) => {
   switch (action.type) {
     case "SET_USERNAME":
       return { ...state, userName: action.username };
-    case "SET_EMAIL":
-      return { ...state, userEmail: action.email };
-    case "SET_PASSWORD":
-      return { ...state, userPassword: action.password };
+    default:
+      return state;
   }
 };
 
@@ -106,10 +104,23 @@ const userCurrentlocationStateReducer = (state, action) => {
   }
 };
 
+const cameraStateReducer = (state, action) => {  
+  if (state === undefined) return { hasCameraPermission: null };
+  switch(action.type) {
+    case "SET_CAMERA":
+      return { ...state, camera: action.value };
+    case "SET_CAMERA_STATUS":
+      return { ...state, hasCameraPermission: action.value };
+    default:
+      return state;
+  };  
+};
+
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
-  findUserCurrentLocation: userCurrentlocationStateReducer
+  findUserCurrentLocation: userCurrentlocationStateReducer,
+  camera: cameraStateReducer
 });
 
 const store = createStore(reducer);
@@ -120,7 +131,9 @@ class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <AppNavigator />
+        {/* <AppNavigator /> */}
+        <TextCamera />
+        <Text>Test</Text>
       </Provider>
     );
   }
