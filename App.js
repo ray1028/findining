@@ -2,11 +2,7 @@ import React, { Component } from "react";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
-import {
-  createAppContainer,
-  createSwitchNavigator,
-  createBottomTabNavigator
-} from "react-navigation";
+import { createAppContainer } from "react-navigation";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { createStackNavigator } from "react-navigation-stack";
 import Signup from "./src/components/Signup";
@@ -66,7 +62,12 @@ const AuthStack = createStackNavigator(
     // Splash: { screen: Splash },
     SignIn: { screen: Login },
     Signup: { screen: Signup },
-    TabNavigator: { screen: TabNavigator }
+    TabNavigator: {
+      screen: TabNavigator,
+      navigationOptions: {
+        header: null
+      }
+    }
   },
   { initialRouteName: "SignIn" }
 );
@@ -97,14 +98,22 @@ const signupStateReducer = (state, action) => {
   }
 };
 
+const userCurrentlocationStateReducer = (state, action) => {
+  if (state === undefined) return {};
+  switch (action.type) {
+    case "SET_LOCATION":
+      return { ...state, userCurrentLocation: action.location };
+  }
+};
+
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
-  signupNewUser: signupStateReducer
+  signupNewUser: signupStateReducer,
+  findUserCurrentLocation: userCurrentlocationStateReducer
 });
 
 const store = createStore(reducer);
 
-// const AppNavigator = createAppContainer(MainNavigator);
 const AppNavigator = createAppContainer(AuthStack);
 
 class App extends React.Component {
