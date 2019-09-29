@@ -11,6 +11,7 @@ import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
 import MainScreen from "./src/components/MainScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
+import axios from "axios";
 
 // bottom tab routes here may wanna moduliza later
 const TabNavigator = createMaterialBottomTabNavigator(
@@ -104,22 +105,31 @@ const userCurrentlocationStateReducer = (state, action) => {
   }
 };
 
-const cameraStateReducer = (state, action) => {  
+const cameraStateReducer = (state, action) => {
   if (state === undefined) return { hasCameraPermission: null };
-  switch(action.type) {
+  switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
     case "SET_CAMERA_STATUS":
       return { ...state, hasCameraPermission: action.value };
+    case "ACTION_IMAGE_AWS":
+      (async () => {
+        const resp = await axios({
+          method: "post",
+          url: "http://172.46.3.175:3000/images",
+          data: action.value
+        });
+      })();
+      return state;
     default:
       return state;
-  };  
+  }
 };
 
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
-  findUserCurrentLocation: userCurrentlocationStateReducer,
+  // findUserCurrentLocation: userCurrentlocationStateReducer || null,
   camera: cameraStateReducer
 });
 
@@ -133,7 +143,7 @@ class App extends React.Component {
       <Provider store={store}>
         {/* <AppNavigator /> */}
         <TextCamera />
-        <Text>Test</Text>
+        {/* <Text>Test</Text> */}
       </Provider>
     );
   }
