@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Button, Text, View, TouchableOpacity } from "react-native";
 import * as Permissions from "expo-permissions";
 import { Camera } from "expo-camera";
 
@@ -50,6 +50,7 @@ import { Camera } from "expo-camera";
 const TextCamera = ({
   hasCameraPermission,
   camera,
+  bounds,
   setCamera,
   setCameraPermission,
   dispatchUploadEvent
@@ -75,6 +76,13 @@ const TextCamera = ({
           type={Camera.Constants.Type.back}
           onMountError={(...p) => console.log(p)}
         >
+          {bounds.map(bound => {
+            return (
+              <TouchableOpacity
+                style={{ ...bound, position: "absolute", borderWidth: 3 }}
+              ></TouchableOpacity>
+            );
+          })}
           <View
             style={{
               flex: 0.5,
@@ -82,7 +90,8 @@ const TextCamera = ({
               flexDirection: "row"
             }}
           >
-            <TouchableOpacity
+            <Button
+              title="Capture"
               style={{
                 flex: 0.1,
                 alignSelf: "flex-end",
@@ -102,12 +111,7 @@ const TextCamera = ({
                   });
                 }
               }}
-            >
-              <Text style={{ fontSize: 18, marginBottom: 10, color: "white" }}>
-                {" "}
-                Capture{" "}
-              </Text>
-            </TouchableOpacity>
+            />
           </View>
         </Camera>
       </View>
@@ -115,7 +119,7 @@ const TextCamera = ({
   }
 };
 
-const mapStateToProps = ({ camera }) => camera;
+const mapStateToProps = ({ cameraView }) => cameraView;
 const mapDispatchToProps = dispatch => ({
   setCameraPermission: status =>
     dispatch({ type: "SET_CAMERA_STATUS", value: status }),
