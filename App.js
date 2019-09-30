@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Text } from "react-native";
+import { connect } from "react-redux";
+import { View, Button, Text, Modal, StyleSheet } from "react-native";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
@@ -11,6 +12,11 @@ import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
 import MainScreen from "./src/components/MainScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
+import UserModal from "./src/components/User";
+import MenuView from "./src/components/MenuView";
+import { Menu } from "react-native-paper";
+import withAcceptReject from "./src/components/withAcceptReject";
+import withPanelNavigation from "./src/components/withPanelNavigation";
 
 // bottom tab routes here may wanna moduliza later
 const TabNavigator = createMaterialBottomTabNavigator(
@@ -101,41 +107,89 @@ const userCurrentlocationStateReducer = (state, action) => {
   switch (action.type) {
     case "SET_LOCATION":
       return { ...state, userCurrentLocation: action.location };
+    default:
+      return state;
   }
 };
 
-const cameraStateReducer = (state, action) => {  
+const cameraStateReducer = (state, action) => {
   if (state === undefined) return { hasCameraPermission: null };
-  switch(action.type) {
+  switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
     case "SET_CAMERA_STATUS":
       return { ...state, hasCameraPermission: action.value };
     default:
       return state;
-  };  
+  };
+};
+
+const MenuViewAR = withAcceptReject(MenuView);
+
+const ModalStateReducer = (state, action) => {
+  if (state === undefined) return { current: null, data: null };
+  switch (action.type) {
+    case "SHOW_MODAL_USER":
+      return { ...state, current: UserModal, data: action.data };
+    case "SHOW_MODAL_MENU":
+      return { ...state, current: MenuViewAR, data: action.data };
+    case "CLOSE_MODAL":
+      return { ...state, current: null, data: null };
+    default:
+      return state;
+  }
 };
 
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
   findUserCurrentLocation: userCurrentlocationStateReducer,
-  camera: cameraStateReducer
+  camera: cameraStateReducer,
+  modals: ModalStateReducer
 });
 
 const store = createStore(reducer);
 
 const AppNavigator = createAppContainer(AuthStack);
 
-class App extends React.Component {
-  render() {
-    return (
-      <Provider store={store}>
-        {/* <AppNavigator /> */}
-        <TextCamera />
-        <Text>Test</Text>
-      </Provider>
-    );
+const DetailsView = withPanelNavigation(UserModal, MenuView);
+
+function App({ modals, dispatch }) {
+  const styles = StyleSheet.create({
+    btn: {
+      borderWidth: 5
+    },
+    main: {
+      paddingTop: 60,
+      display: 'flex',
+      height: '100%',
+      borderWidth: 5
+    }
+  });
+
+  const CurrentModalComponent = modals.current;
+  if (CurrentModalComponent) {
+    return (<Modal animationType="slide" transparent={false}><CurrentModalComponent /></Modal>);
   }
+
+  return (
+    <View style={{ paddingTop: 60, height: '100%', background: 'black' }} >
+      {/* <AppNavigator /> */}
+      {/* <TextCamera /> */}
+      {/* <Button title={"SHOW"} style={styles.btn} onPress={() => { */}
+        {/* dispatch({ type: "SHOW_MODAL_MENU", data: "TEST" }); */}
+      {/* }} /> */}
+    </View>
+  );
 }
-export default App;
+
+const withProvider = (AppComponent) => {
+  return () => (<Provider store={store}><AppComponent /></Provider>);
+}
+
+const mapStateToProps = ({ modals }) => ({ modals });
+const mapDispatchToProps = (dispatch) => ({
+  dispatch: dispatch
+});
+
+export default withProvider(connect(mapStateToProps, mapDispatchToProps)(App));
