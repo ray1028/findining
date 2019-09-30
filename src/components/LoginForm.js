@@ -15,7 +15,10 @@ import { connect } from "react-redux";
 const LoginForm = props => {
   return (
     <View style={styles.formContainer}>
-      <Image style={styles.logo} source={require("../images/findining.png")} />
+      <Image
+        style={styles.logo}
+        source={require("../assets/images/findining.png")}
+      />
       <Input
         placeholder="Email"
         autoCorrect={false}

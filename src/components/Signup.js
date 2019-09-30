@@ -62,6 +62,7 @@ const Signup = props => {
         type="clear"
         icon={<Icon name="plus" size={15} color="white" />}
         style={styles.signupButton}
+        onPress={() => props.navigation.navigate("Profile")}
       />
     </FormWrap>
   );

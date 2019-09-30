@@ -9,19 +9,19 @@ import Constants from "expo-constants";
 let fakeUsersObj = [
   {
     id: 1,
-    iconImage: require("../images/findining.png"),
+    iconImage: require("../assets/images/findining.png"),
     latitude: 43.644152,
     longitude: -79.402227
   },
   {
     id: 2,
-    iconImage: require("../images/findining.png"),
+    iconImage: require("../assets/images/findining.png"),
     latitude: 43.644154,
     longitude: -79.402223
   },
   {
     id: 3,
-    iconImage: require("../images/findining.png"),
+    iconImage: require("../assets/images/findining.png"),
     latitude: 43.6441543,
     longitude: -79.402222
   }
@@ -81,7 +81,7 @@ const MainScreen = props => {
             latitude: user.latitude,
             longitude: user.longitude
           }}
-          image={require("../images/findining.png")}
+          image={require("../assets/images/findining.png")}
         />
       ))}
 
