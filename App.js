@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text } from "react-native";
+import { Text, ActivityIndicatorComponent } from "react-native";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
@@ -11,6 +11,7 @@ import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
 import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
+import Profile from "./src/components/Profile";
 import axios from "axios";
 
 // bottom tab routes here may wanna moduliza later
@@ -62,7 +63,7 @@ const AuthStack = createStackNavigator(
   {
     SignIn: { screen: Login },
     Signup: { screen: Signup },
-
+    Profile: { screen: Profile },
     TabNavigator: {
       screen: MainNavigator,
       navigationOptions: {
@@ -91,7 +92,7 @@ const signupStateReducer = (state, action) => {
   if (state === undefined) return {};
   switch (action.type) {
     case "SET_USERNAME":
-      return { ...state, userName: action.username };
+      return { ...state, signupNewUser: action.username };
     default:
       return state;
   }
@@ -102,6 +103,31 @@ const userCurrentlocationStateReducer = (state, action) => {
   switch (action.type) {
     case "SET_LOCATION":
       return { ...state, userCurrentLocation: action.location };
+  }
+};
+
+const userProfileStateReducer = (state, action) => {
+  if (state === undefined) return { userInterests: [], genderChecked: null };
+
+  switch (action.type) {
+    case "SET_GENDER_CHECKED":
+      return { ...state, genderChecked: action.check };
+    case "SET_USERNAME":
+      return { ...state, username: action.name };
+    case "SET_INTEREST":
+      return {
+        ...state,
+        userInterests: [...state.userInterests, action.interest]
+      };
+    case "REMOVE_INTEREST":
+      return {
+        ...state,
+        userInterests: state.userInterests.filter(
+          interest => interest !== action.interest
+        )
+      };
+    default:
+      return state;
   }
 };
 
@@ -116,10 +142,10 @@ const cameraStateReducer = (state, action) => {
       return { ...state, bounds: action.value };
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
-      const dimensions = {
-        width: action.value.meta.PixelXDimension,
-        height: action.value.meta.PixelYDimension
-      };
+      // const dimensions = {
+      //   width: action.value.meta.PixelXDimension,
+      //   height: action.value.meta.PixelYDimension
+      // };
       (async () => {
         const resp = await axios({
           method: "post",
@@ -133,10 +159,6 @@ const cameraStateReducer = (state, action) => {
             width: `${bound.width * 100}%`,
             left: `${bound.left * 100}%`,
             top: `${bound.top * 100}%`
-            // height: bound.height * dimensions.height,
-            // width: bound.width * dimensions.width,
-            // left: bound.left * dimensions.width,
-            // top: bound.top * dimensions.height
           };
         });
         console.log(bounds);
@@ -155,7 +177,8 @@ const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
   // findUserCurrentLocation: userCurrentlocationStateReducer || null,
-  cameraView: cameraStateReducer
+  cameraView: cameraStateReducer,
+  userProfile: userProfileStateReducer
 });
 
 const store = createStore(reducer);

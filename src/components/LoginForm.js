@@ -15,7 +15,10 @@ import { connect } from "react-redux";
 const LoginForm = props => {
   return (
     <View style={styles.formContainer}>
-      <Image style={styles.logo} source={require("../images/findining.png")} />
+      <Image
+        style={styles.logo}
+        source={require("../assets/images/findining.png")}
+      />
       <Input
         placeholder="Email"
         autoCorrect={false}
@@ -51,7 +54,7 @@ const LoginForm = props => {
       <TouchableOpacity
         activeOpacity={0.2}
         style={styles.submitButton}
-        onPress={() => props.navigation.navigate("TabNavigator")}
+        onPress={() => navigation.navigate("TabNavigator")}
       >
         <Text style={styles.submitText}>Sign in</Text>
       </TouchableOpacity>
