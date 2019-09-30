@@ -9,14 +9,14 @@ import { createStackNavigator } from "react-navigation-stack";
 import Signup from "./src/components/Signup";
 import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
-import MainScreen from "./src/components/MainScreen";
+import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 // bottom tab routes here may wanna moduliza later
-const TabNavigator = createMaterialBottomTabNavigator(
+const MainNavigator = createMaterialBottomTabNavigator(
   {
     Home: {
-      screen: MainScreen,
+      screen: MapScreen,
       navigationOption: {
         tabBarLabel: "Home",
         tabBarIcon: ({ focused }) => (
@@ -59,11 +59,11 @@ const TabNavigator = createMaterialBottomTabNavigator(
 
 const AuthStack = createStackNavigator(
   {
-    // Splash: { screen: Splash },
     SignIn: { screen: Login },
     Signup: { screen: Signup },
+
     TabNavigator: {
-      screen: TabNavigator,
+      screen: MainNavigator,
       navigationOptions: {
         header: null
       }
@@ -131,9 +131,7 @@ class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        {/* <AppNavigator /> */}
-        <TextCamera />
-        <Text>Test</Text>
+        <AppNavigator />
       </Provider>
     );
   }
