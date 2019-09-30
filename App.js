@@ -11,6 +11,7 @@ import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
 import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
+import axios from "axios";
 
 // bottom tab routes here may wanna moduliza later
 const MainNavigator = createMaterialBottomTabNavigator(
@@ -104,23 +105,57 @@ const userCurrentlocationStateReducer = (state, action) => {
   }
 };
 
-const cameraStateReducer = (state, action) => {  
-  if (state === undefined) return { hasCameraPermission: null };
-  switch(action.type) {
+const cameraStateReducer = (state, action) => {
+  if (state === undefined) return { hasCameraPermission: null, bounds: [] };
+  switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
     case "SET_CAMERA_STATUS":
       return { ...state, hasCameraPermission: action.value };
+    case "SET_IMAGE_BOUNDS":
+      return { ...state, bounds: action.value };
+    case "ACTION_IMAGE_AWS":
+      state.camera.pausePreview();
+      const dimensions = {
+        width: action.value.meta.PixelXDimension,
+        height: action.value.meta.PixelYDimension
+      };
+      (async () => {
+        const resp = await axios({
+          method: "post",
+          url: "http://172.46.3.175:3000/images",
+          data: action.value
+        });
+        const bounds = resp.data.map(detection => {
+          const bound = detection.geometry.boundingBox;
+          return {
+            height: `${bound.height * 100}%`,
+            width: `${bound.width * 100}%`,
+            left: `${bound.left * 100}%`,
+            top: `${bound.top * 100}%`
+            // height: bound.height * dimensions.height,
+            // width: bound.width * dimensions.width,
+            // left: bound.left * dimensions.width,
+            // top: bound.top * dimensions.height
+          };
+        });
+        console.log(bounds);
+        store.dispatch({
+          type: "SET_IMAGE_BOUNDS",
+          value: bounds
+        });
+      })();
+      return state;
     default:
       return state;
-  };  
+  }
 };
 
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
-  findUserCurrentLocation: userCurrentlocationStateReducer,
-  camera: cameraStateReducer
+  // findUserCurrentLocation: userCurrentlocationStateReducer || null,
+  cameraView: cameraStateReducer
 });
 
 const store = createStore(reducer);
