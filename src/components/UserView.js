@@ -13,7 +13,7 @@ const UserModal = () => {
       <View backgroundColor="black" style={{ flex: 1 }}>
         <View style={{ alignItems: 'center' }}>
           <Image
-            source={require('../images/profile.jpg')}
+            source={require('../assets/images/ray.png')}
             containerStyle={{ width: 260, height: 260, borderRadius: 130, overflow: 'hidden' }}
           />
           <Text style={{ color: 'white', fontSize: 40, overflow: 'hidden', borderBottomWidth: 5, borderBottomColor: 'white' }}>

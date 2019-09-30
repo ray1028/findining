@@ -50,11 +50,15 @@ import { Camera } from "expo-camera";
 const TextCamera = ({
   hasCameraPermission,
   camera,
-  bounds,
+  bounds,  
   setCamera,
+  isFocused,
   setCameraPermission,
   dispatchUploadEvent
 }) => {
+  if (!isFocused) {
+    return <View />
+  }
   useEffect(() => {
     (async () => {
       const { status } = await Permissions.askAsync(Permissions.CAMERA);

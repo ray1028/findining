@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { Text, ActivityIndicatorComponent, View, Button, Text, Modal, StyleSheet } from "react-native";
+import { Text, ActivityIndicatorComponent, View, Button, Modal, StyleSheet } from "react-native";
 import { connect } from "react-redux";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
-import { createAppContainer } from "react-navigation";
+import { createAppContainer, withNavigationFocus } from "react-navigation";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { createStackNavigator } from "react-navigation-stack";
 import Signup from "./src/components/Signup";
@@ -18,7 +18,6 @@ import UserView from "./src/components/UserView";
 import MenuView from "./src/components/MenuView";
 import { Menu } from "react-native-paper";
 import withAcceptReject from "./src/components/withAcceptReject";
-import withPanelNavigation from "./src/components/withPanelNavigation";
 
 // bottom tab routes here may wanna moduliza later
 const MainNavigator = createMaterialBottomTabNavigator(
@@ -35,7 +34,7 @@ const MainNavigator = createMaterialBottomTabNavigator(
       }
     },
     Camera: {
-      screen: TextCamera,
+      screen: withNavigationFocus(TextCamera),
       navigationOption: {
         tabBarLabel: "Camera",
         tabBarIcon: ({ focused }) => (
@@ -46,7 +45,7 @@ const MainNavigator = createMaterialBottomTabNavigator(
       }
     },
     Setting: {
-      screen: Home,
+      screen: Profile,
       navigationOption: {
         tabBarLabel: "Setting",
         tabBarIcon: ({ focused }) => (
@@ -206,8 +205,6 @@ const reducer = combineReducers({
 const store = createStore(reducer);
 
 const AppNavigator = createAppContainer(AuthStack);
-
-const DetailsView = withPanelNavigation(UserModal, MenuView);
 
 const App = () => {
   const styles = StyleSheet.create({
