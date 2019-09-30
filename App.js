@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Text, ActivityIndicatorComponent } from "react-native";
+import { Text, ActivityIndicatorComponent, View, Button, Text, Modal, StyleSheet } from "react-native";
+import { connect } from "react-redux";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
@@ -13,6 +14,11 @@ import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Profile from "./src/components/Profile";
 import axios from "axios";
+import UserView from "./src/components/UserView";
+import MenuView from "./src/components/MenuView";
+import { Menu } from "react-native-paper";
+import withAcceptReject from "./src/components/withAcceptReject";
+import withPanelNavigation from "./src/components/withPanelNavigation";
 
 // bottom tab routes here may wanna moduliza later
 const MainNavigator = createMaterialBottomTabNavigator(
@@ -99,10 +105,12 @@ const signupStateReducer = (state, action) => {
 };
 
 const userCurrentlocationStateReducer = (state, action) => {
-  if (state === undefined) return {};
+  if (state === undefined) return { userCurrentLocation: null };
   switch (action.type) {
     case "SET_LOCATION":
       return { ...state, userCurrentLocation: action.location };
+    default:
+      return state;
   }
 };
 
@@ -142,10 +150,6 @@ const cameraStateReducer = (state, action) => {
       return { ...state, bounds: action.value };
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
-      // const dimensions = {
-      //   width: action.value.meta.PixelXDimension,
-      //   height: action.value.meta.PixelYDimension
-      // };
       (async () => {
         const resp = await axios({
           method: "post",
@@ -170,28 +174,63 @@ const cameraStateReducer = (state, action) => {
       return state;
     default:
       return state;
+  };
+};
+
+const MenuViewAR = withAcceptReject(MenuView);
+
+const ModalStateReducer = (state, action) => {
+  if (state === undefined) return { current: null, data: null };
+  switch (action.type) {
+    case "SHOW_MODAL_USER":
+      return { ...state, current: UserModal, data: action.data };
+    case "SHOW_MODAL_MENU":
+      return { ...state, current: MenuViewAR, data: action.data };
+    case "CLOSE_MODAL":
+      return { ...state, current: null, data: null };
+    default:
+      return state;
   }
 };
 
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
-  // findUserCurrentLocation: userCurrentlocationStateReducer || null,
   cameraView: cameraStateReducer,
-  userProfile: userProfileStateReducer
+  userProfile: userProfileStateReducer,
+  findUserCurrentLocation: userCurrentlocationStateReducer,
+  camera: cameraStateReducer,
+  modals: ModalStateReducer
 });
 
 const store = createStore(reducer);
 
 const AppNavigator = createAppContainer(AuthStack);
 
-class App extends React.Component {
-  render() {
-    return (
-      <Provider store={store}>
-        <AppNavigator />
-      </Provider>
-    );
-  }
+const DetailsView = withPanelNavigation(UserModal, MenuView);
+
+const App = () => {
+  const styles = StyleSheet.create({
+    btn: {
+      borderWidth: 5
+    },
+    main: {
+      paddingTop: 60,
+      display: 'flex',
+      height: '100%',
+      borderWidth: 5
+    }
+  });
+
+  return (
+    <View style={{ paddingTop: 60, height: '100%', background: 'black' }} >
+      <AppNavigator />
+    </View>
+  );
 }
-export default App;
+
+const withProvider = (AppComponent) => {
+  return () => (<Provider store={store}><AppComponent /></Provider>);
+};
+
+export default withProvider(App);
