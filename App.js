@@ -113,6 +113,8 @@ const userProfileStateReducer = (state, action) => {
   switch (action.type) {
     case "SET_GENDER_CHECKED":
       return { ...state, genderChecked: action.check };
+    case "SET_USERNAME":
+      return { ...state, username: action.name };
     case "SET_INTEREST":
       return {
         ...state,
@@ -188,7 +190,7 @@ class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <Profile />
+        {/* <Profile /> */}
         {/* <AppNavigator /> */}
         {/* <TextCamera /> */}
         {/* <Text>Test</Text> */}

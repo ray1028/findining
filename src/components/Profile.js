@@ -1,6 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Text, ImageBackground } from "react-native";
-import { Image, Input, Header, Icon } from "react-native-elements";
+import { View, StyleSheet, ImageBackground } from "react-native";
+import { Input, Icon, Avatar, withBadge, Button } from "react-native-elements";
 import { connect } from "react-redux";
 import { TouchableOpacity } from "react-native";
 
@@ -68,18 +68,37 @@ const interests = [
   }
 ];
 
+const BadgedIcon = withBadge(
+  <Icon
+    type="font-awesome"
+    name="camera"
+    containerStyle={{
+      backgroundColor: "lightblue",
+      width: 50,
+      borderRadius: 50,
+      borderStyle: "solid",
+      aspectRatio: 1,
+      justifyContent: "center",
+      alignItems: "center"
+    }}
+  />,
+  { top: 3, right: -10 }
+)(Avatar);
+
 const Profile = ({
   checked,
   changeGenderChecked,
   pushInterestsHandler,
   userInterests,
-  removeInterestHandler
+  removeInterestHandler,
+  usernameChangeHandler,
+  navigation
 }) => {
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
         <ImageBackground
-          source={require("../assets/images/profile-background.jpg")}
+          source={require("../assets/images/profile_background.jpeg")}
           style={{
             width: "100%",
             height: "100%",
@@ -87,28 +106,47 @@ const Profile = ({
             alignItems: "center"
           }}
         >
-          <Image
-            style={styles.userIcon}
-            source={{
-              uri: "https://facebook.github.io/react-native/img/tiny_logo.png"
-            }}
+          <BadgedIcon
+            source={require("../assets/images/ray.png")}
+            rounded
+            size={170}
           />
         </ImageBackground>
       </View>
 
       <View style={styles.bottomContainer}>
         <Input
-          placeholder="Name That You Wish To Be Called"
-          style={{ margin: 20 }}
+          // placeholder="You Wish To Be Called"
+          inputStyle={{
+            textAlign: "center",
+            letterSpacing: 0.5,
+            color: "white"
+          }}
+          containerStyle={{
+            paddingTop: 10,
+            width: "80%",
+            borderColor: "orange"
+          }}
+          onChangeText={name => usernameChangeHandler(name)}
+          label={"Your Name"}
+          color="white"
         />
         <View style={styles.radioBoxContainer}>
           {options.map(option => {
             return (
               <View key={option.key} style={styles.radioOptionContainer}>
                 {option.key === "male" ? (
-                  <Icon type="foundation" name="male-symbol" />
+                  <Icon
+                    type="foundation"
+                    name="male-symbol"
+                    iconStyle={{ color: "white" }}
+                  />
                 ) : (
-                  <Icon type="foundation" name="female-symbol" />
+                  <Icon
+                    type="foundation"
+                    name="female-symbol"
+                    iconStyle={{ color: "white" }}
+                  />
                 )}
                 <TouchableOpacity
                   style={styles.radioBox}
@@ -140,7 +178,7 @@ const Profile = ({
                   iconStyle={{
                     color: userInterests.includes(interest.key)
                       ? "orange"
-                      : "black"
+                      : "white"
                   }}
                   size={35}
                   underlayColor="blue"
@@ -149,6 +187,17 @@ const Profile = ({
             );
           })}
         </View>
+
+        <Button
+          title="NEXT"
+          containerStyle={{ width: 100, marginTop: 20 }}
+          buttonStyle={{
+            backgroundColor: "orange",
+            borderRadius: 40,
+            letterSpacing: 4,
+            fontSize: 20
+          }}
+        />
       </View>
     </View>
   );
@@ -165,14 +214,16 @@ const styles = StyleSheet.create({
     backgroundColor: "white"
   },
   userIcon: {
-    width: 120,
-    height: 120,
+    // width: ,
+    height: "100%",
+    aspectRatio: 1,
     borderRadius: 60
   },
   radioBox: {
     height: 20,
     width: 20,
     borderRadius: 10,
+    borderColor: "white",
     borderWidth: 1,
     alignItems: "center",
     marginLeft: 10,
@@ -189,13 +240,15 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     flex: 0.6,
-    backgroundColor: "white"
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#3A445D"
   },
   checkedCircle: {
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: "black"
+    backgroundColor: "orange"
   },
   interestContainer: {
     // flex: 1,
@@ -212,7 +265,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 12,
     margin: 3
-    // margin: 5
   }
 });
 
@@ -227,6 +279,7 @@ const mapDispatchToProps = dispatch => {
   return {
     changeGenderChecked: check =>
       dispatch({ type: "SET_GENDER_CHECKED", check }),
+    usernameChangeHandler: name => dispatch({ type: "SET_USERNAME", name }),
     pushInterestsHandler: interest =>
       dispatch({ type: "SET_INTEREST", interest }),
     removeInterestHandler: interest =>
