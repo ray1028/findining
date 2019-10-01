@@ -1,5 +1,12 @@
 import React, { Component } from "react";
-import { Text, ActivityIndicatorComponent, View, Button, Modal, StyleSheet } from "react-native";
+import {
+  Text,
+  ActivityIndicatorComponent,
+  View,
+  Button,
+  Modal,
+  StyleSheet
+} from "react-native";
 import { connect } from "react-redux";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
@@ -70,13 +77,16 @@ const AuthStack = createStackNavigator(
     Signup: { screen: Signup },
     Profile: { screen: Profile },
     TabNavigator: {
-      screen: MainNavigator,
-      navigationOptions: {
-        header: null
-      }
+      screen: MainNavigator
+      // navigationOptions: {
+      //   header: null
+      // }
     }
   },
-  { initialRouteName: "SignIn" }
+  {
+    initialRouteName: "SignIn",
+    defaultNavigationOptions: { header: null, headerVisible: false }
+  }
 );
 
 // MainNavigator
@@ -157,6 +167,7 @@ const cameraStateReducer = (state, action) => {
         });
         const bounds = resp.data.map(detection => {
           const bound = detection.geometry.boundingBox;
+          console.log(JSON.stringify(detection));
           return {
             height: `${bound.height * 100}%`,
             width: `${bound.width * 100}%`,
@@ -164,7 +175,6 @@ const cameraStateReducer = (state, action) => {
             top: `${bound.top * 100}%`
           };
         });
-        console.log(bounds);
         store.dispatch({
           type: "SET_IMAGE_BOUNDS",
           value: bounds
@@ -173,7 +183,7 @@ const cameraStateReducer = (state, action) => {
       return state;
     default:
       return state;
-  };
+  }
 };
 
 const MenuViewAR = withAcceptReject(MenuView);
@@ -212,22 +222,26 @@ const App = () => {
       borderWidth: 5
     },
     main: {
-      paddingTop: 60,
-      display: 'flex',
-      height: '100%',
+      // paddingTop: 60,
+      display: "flex",
+      height: "100%",
       borderWidth: 5
     }
   });
 
   return (
-    <View style={{ paddingTop: 60, height: '100%', background: 'black' }} >
+    <View style={{ height: "100%", background: "black" }}>
       <AppNavigator />
     </View>
   );
-}
+};
 
-const withProvider = (AppComponent) => {
-  return () => (<Provider store={store}><AppComponent /></Provider>);
+const withProvider = AppComponent => {
+  return () => (
+    <Provider store={store}>
+      <AppComponent />
+    </Provider>
+  );
 };
 
 export default withProvider(App);

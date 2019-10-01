@@ -50,14 +50,14 @@ import { Camera } from "expo-camera";
 const TextCamera = ({
   hasCameraPermission,
   camera,
-  bounds,  
+  bounds,
   setCamera,
   isFocused,
   setCameraPermission,
   dispatchUploadEvent
 }) => {
   if (!isFocused) {
-    return <View />
+    return <View />;
   }
   useEffect(() => {
     (async () => {
@@ -80,11 +80,14 @@ const TextCamera = ({
           type={Camera.Constants.Type.back}
           onMountError={(...p) => console.log(p)}
         >
-          {bounds.map(bound => {
+          {bounds.map((bound, index) => {
             return (
               <TouchableOpacity
+                key={index}
                 style={{ ...bound, position: "absolute", borderWidth: 3 }}
-              ></TouchableOpacity>
+              >
+                {/* <Text>{bound.text}</Text> */}
+              </TouchableOpacity>
             );
           })}
           <View
