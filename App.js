@@ -7,6 +7,7 @@ import {
   Modal,
   StyleSheet
 } from "react-native";
+
 import { connect } from "react-redux";
 import Login from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
@@ -22,6 +23,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import Profile from "./src/components/Profile";
 import axios from "axios";
 import MenuScreen from "./src/components/MenuScreen";
+import UserScreen from "./src/components/UserScreen";
 import EventDetailScreen from "./src/components/EventDetailScreen";
 import { Menu } from "react-native-paper";
 
@@ -76,6 +78,7 @@ const AuthStack = createStackNavigator(
     Signup: { screen: Signup },
     Profile: { screen: Profile },
     EventDetail: { screen: EventDetailScreen },
+    UserScreen: { screen: UserScreen },
     TabNavigator: {
       screen: MapNavigator,
       navigationOptions: {
@@ -181,6 +184,11 @@ const cameraStateReducer = (state, action) => {
         });
       })();
       return state;
+    case "RESET_CAMERA":
+      if (state.camera) {
+        state.camera.resumePreview();
+      }
+      return { ...state, bounds: [] };
     default:
       return state;
   }

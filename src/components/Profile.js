@@ -119,7 +119,7 @@ const Profile = ({
           // placeholder="You Wish To Be Called"
           inputStyle={{
             textAlign: "center",
-            letterSpacing: 0.5,
+            // letterSpacing: 0.5,
             color: "white"
           }}
           containerStyle={{

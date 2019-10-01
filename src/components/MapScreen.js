@@ -1,10 +1,17 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  TouchableOpacity
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { connect } from "react-redux";
 import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
 import Constants from "expo-constants";
+import { Image } from "react-native-elements";
 
 let fakeUsersObj = [
   {
@@ -82,17 +89,15 @@ const MapScreen = (props) => {
             latitude: user.latitude,
             longitude: user.longitude
           }}
-          image={require("../assets/images/findining.png")}
-        />
+        >
+          <TouchableOpacity>
+            <Image
+              source={require("../assets/images/findining.png")}
+              style={{ width: 30, height: 30 }}
+            />
+          </TouchableOpacity>
+        </Marker>
       ))}
-
-      {/* <Marker
-        coordinate={{
-          latitude: 43.644299,
-          longitude: -79.402225
-        }}
-        image={require("../images/findining.png")}
-      /> */}
     </MapView>
   );
 };
@@ -113,8 +118,4 @@ export default connect(
   mapDispatchToProps
 )(MapScreen);
 
-const styles = StyleSheet.create({
-  mainScreenContainer: {
-    // flexs: 1
-  }
-});
+const styles = StyleSheet.create({});

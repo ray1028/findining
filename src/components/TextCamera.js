@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { Button, Text, View, TouchableOpacity } from "react-native";
+import { Button, Text, View, TouchableOpacity, StyleSheet } from "react-native";
 import * as Permissions from "expo-permissions";
 import { Camera } from "expo-camera";
+import { Header } from "react-native-elements";
+import MapScreen from "./MapScreen";
 
 // Object {
 //   "ColorSpace": 1,
@@ -54,18 +56,26 @@ const TextCamera = ({
   setCamera,
   isFocused,
   setCameraPermission,
-  dispatchUploadEvent
+  dispatchUploadEvent,
+  dispatchResetCamera
 }) => {
-  if (!isFocused) {
-    return <View />;
-  }
   useEffect(() => {
+    // cleaning up camera
+    if (!isFocused) {
+      dispatchResetCamera();
+      return;
+    }
     (async () => {
       const { status } = await Permissions.askAsync(Permissions.CAMERA);
       console.log("set status", status);
       setCameraPermission(status);
     })();
-  }, []);
+  }, [isFocused]);
+
+  if (!isFocused) {
+    return <View />;
+  }
+
   console.log("permission check", hasCameraPermission);
   if (hasCameraPermission === null) {
     return <View />;
@@ -74,53 +84,48 @@ const TextCamera = ({
   } else {
     return (
       <View style={{ flex: 1 }}>
-        <Camera
-          style={{ flex: 1 }}
-          ref={setCamera}
-          type={Camera.Constants.Type.back}
-          onMountError={(...p) => console.log(p)}
+        <Header
+          style={styles.headerBar}
+          centerComponent={{ text: "Findining" }}
+          backgroundColor="#3A445D"
         >
-          {bounds.map((bound, index) => {
-            return (
-              <TouchableOpacity
-                key={index}
-                style={{ ...bound, position: "absolute", borderWidth: 3 }}
-              >
-                {/* <Text>{bound.text}</Text> */}
-              </TouchableOpacity>
-            );
-          })}
-          <View
-            style={{
-              flex: 0.5,
-              backgroundColor: "transparent",
-              flexDirection: "row"
-            }}
+          {/* <MapScreen /> */}
+        </Header>
+        <View style={styles.topContainer}>
+          <Camera
+            style={{ flex: 1, position: "relative" }}
+            ref={setCamera}
+            type={Camera.Constants.Type.back}
+            onMountError={(...p) => console.log(p)}
           >
-            <Button
-              title="Capture"
-              style={{
-                flex: 0.1,
-                alignSelf: "flex-end",
-                alignItems: "center"
-              }}
-              onPress={async () => {
-                if (camera) {
-                  const photo = await camera.takePictureAsync({
-                    exif: true,
-                    base64: true,
-                    skipProcessing: true
-                  });
-                  // console.log(photo.base64.length, photo.exif);
-                  dispatchUploadEvent({
-                    image: photo.base64,
-                    meta: photo.exif
-                  });
-                }
-              }}
-            />
-          </View>
-        </Camera>
+            {bounds.map((bound, index) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={{ ...bound, position: "absolute", borderWidth: 3 }}
+                ></TouchableOpacity>
+              );
+            })}
+          </Camera>
+        </View>
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity
+            style={styles.captureButton}
+            onPress={async () => {
+              if (camera) {
+                const photo = await camera.takePictureAsync({
+                  exif: true,
+                  base64: true,
+                  skipProcessing: true
+                });
+                dispatchUploadEvent({
+                  image: photo.base64,
+                  meta: photo.exif
+                });
+              }
+            }}
+          ></TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -132,7 +137,41 @@ const mapDispatchToProps = dispatch => ({
     dispatch({ type: "SET_CAMERA_STATUS", value: status }),
   setCamera: camera => dispatch({ type: "SET_CAMERA", value: camera }),
   dispatchUploadEvent: image =>
-    dispatch({ type: "ACTION_IMAGE_AWS", value: image })
+    dispatch({ type: "ACTION_IMAGE_AWS", value: image }),
+  dispatchResetCamera: () => dispatch({ type: "RESET_CAMERA" })
+});
+
+const styles = StyleSheet.create({
+  buttonConrainer: {
+    flex: 1,
+    flexDirection: "column-reverse",
+    width: "100%",
+    alignItems: "center",
+    alignContent: "center",
+    marginBottom: 10
+  },
+  topContainer: {
+    flex: 7
+  },
+  bottomContainer: {
+    flex: 3,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#3A445D"
+  },
+  captureButton: {
+    height: 100,
+    width: 100,
+    borderWidth: 15,
+    backgroundColor: "white",
+    borderStyle: "solid",
+    borderColor: "orange",
+    opacity: 2,
+    borderRadius: 50
+  },
+  headerBar: {
+    color: "white"
+  }
 });
 
 export default connect(
