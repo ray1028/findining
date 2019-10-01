@@ -29,7 +29,7 @@ let fakeUsersObj = [
 
 let location = {};
 
-const MainScreen = props => {
+const MapScreen = (props) => {
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== "granted") {
@@ -76,6 +76,7 @@ const MainScreen = props => {
     >
       {fakeUsersObj.map(user => (
         <Marker
+          onPress={() => props.navigation.navigate('EventDetail')}
           key={user.id}
           coordinate={{
             latitude: user.latitude,
@@ -110,7 +111,7 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(MainScreen);
+)(MapScreen);
 
 const styles = StyleSheet.create({
   mainScreenContainer: {

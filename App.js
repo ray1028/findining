@@ -21,13 +21,12 @@ import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Profile from "./src/components/Profile";
 import axios from "axios";
-import UserView from "./src/components/UserView";
-import MenuView from "./src/components/MenuView";
+import MenuScreen from "./src/components/MenuScreen";
+import EventDetailScreen from "./src/components/EventDetailScreen";
 import { Menu } from "react-native-paper";
-import withAcceptReject from "./src/components/withAcceptReject";
 
 // bottom tab routes here may wanna moduliza later
-const MainNavigator = createMaterialBottomTabNavigator(
+const MapNavigator = createMaterialBottomTabNavigator(
   {
     Home: {
       screen: MapScreen,
@@ -76,11 +75,12 @@ const AuthStack = createStackNavigator(
     SignIn: { screen: Login },
     Signup: { screen: Signup },
     Profile: { screen: Profile },
+    EventDetail: { screen: EventDetailScreen },
     TabNavigator: {
-      screen: MainNavigator
-      // navigationOptions: {
-      //   header: null
-      // }
+      screen: MapNavigator,
+      navigationOptions: {
+        header: null
+      }
     }
   },
   {
@@ -89,7 +89,7 @@ const AuthStack = createStackNavigator(
   }
 );
 
-// MainNavigator
+// MapNavigator
 
 const loginStateReducer = (state, action) => {
   if (state === undefined) return {};
@@ -186,30 +186,13 @@ const cameraStateReducer = (state, action) => {
   }
 };
 
-const MenuViewAR = withAcceptReject(MenuView);
-
-const ModalStateReducer = (state, action) => {
-  if (state === undefined) return { current: null, data: null };
-  switch (action.type) {
-    case "SHOW_MODAL_USER":
-      return { ...state, current: UserModal, data: action.data };
-    case "SHOW_MODAL_MENU":
-      return { ...state, current: MenuViewAR, data: action.data };
-    case "CLOSE_MODAL":
-      return { ...state, current: null, data: null };
-    default:
-      return state;
-  }
-};
-
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
   cameraView: cameraStateReducer,
   userProfile: userProfileStateReducer,
   findUserCurrentLocation: userCurrentlocationStateReducer,
-  camera: cameraStateReducer,
-  modals: ModalStateReducer
+  camera: cameraStateReducer
 });
 
 const store = createStore(reducer);
