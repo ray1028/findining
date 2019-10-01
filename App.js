@@ -194,11 +194,23 @@ const cameraStateReducer = (state, action) => {
   }
 };
 
+const eventDetailReducer = (state, action) => {
+  if (state === undefined) return { selectedScreen: 'User' };
+
+  switch (action.type) {
+    case "SET_EVENT_SCREEN":
+      return { ...state, selectedScreen: action.screen };
+    default:
+      return state;
+  }
+};
+
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
   cameraView: cameraStateReducer,
   userProfile: userProfileStateReducer,
+  eventDetail: eventDetailReducer,
   findUserCurrentLocation: userCurrentlocationStateReducer,
   camera: cameraStateReducer
 });

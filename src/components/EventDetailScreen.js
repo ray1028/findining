@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from "react-redux";
-import { Modal, Text, View, Alert, TouchableOpacity, Icon } from 'react-native';
-import { Image } from 'react-native-elements';
+import { Text, View, FlatList } from 'react-native';
+import { Image, Icon } from 'react-native-elements';
 import { createSwitchNavigator } from 'react-navigation';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
 import UserScreen from "./UserScreen";
@@ -13,37 +13,47 @@ const PanelNavigator = createSwitchNavigator({
 },
   {
     initialRouteName: 'User',
+    backBehavior: 'none',
     defaultNavigationOptions: {
-      header: null,
-      // gesturesEnabled: true,
-      // gestureDirection: 'horizontal',
-      // gestureResponseDistance: {
-      //   horizontal: 600,
-      //   vertical: 600
-      // }
+      header: null
     }
   });
 
-const EventDetailScreen = (props) => {
+const EventDetailScreen = ({ navigation, selectedScreen, navigatePaginate }) => {
   const config = {
-    velocityThreshold: 0.3,
-    directionalOffsetThreshold: 40
+    velocityThreshold: 0.1,
+    directionalOffsetThreshold: 60
   };
+  console.log(selectedScreen);
   return (
     <GestureRecognizer
-      onSwipeLeft={() => props.navigation.navigate('User')}
-      onSwipeRight={() => props.navigation.navigate('Menu')}
+      onSwipeRight={() => navigatePaginate(navigation, 'User')}
+      onSwipeLeft={() => navigatePaginate(navigation, 'Menu')}
       config={config}
       style={{
         flex: 1,
         backgroundColor: 'transparent'
       }}
     >
-      <PanelNavigator {...props} />
+      <PanelNavigator navigation={navigation} />
+      <View style={{ zIndex: 1, position: 'absolute', left: 0, bottom: 0, width: '100%', height: 40, flexDirection: 'row', justifyContent: 'center' }}>
+        <Icon size={22} style={{ color: 'red', marginRight: 5 }} type="font-awesome" name={'User' === selectedScreen ? "circle" : "circle-o"} />
+        <Icon size={22} style={{ color: 'red' }} type="font-awesome" name={'Menu' === selectedScreen ? "circle" : "circle-o"} />
+      </View>
+
     </GestureRecognizer>
   )
 };
 
 EventDetailScreen.router = PanelNavigator.router;
 
-export default EventDetailScreen;
+const mapStateToProps = ({ eventDetail }) => eventDetail;
+
+const mapDispatchToProps = (dispatch) => ({
+  navigatePaginate: (navigation, screen) => {
+    navigation.navigate(screen);
+    dispatch({ type: 'SET_EVENT_SCREEN', screen });
+  }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(EventDetailScreen);
