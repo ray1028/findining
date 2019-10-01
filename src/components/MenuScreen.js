@@ -53,7 +53,7 @@ const resturant = {
 // const getTypeImage = (type) => images[type][Math.round(Math.random() * (images[type].length - 1))];
 const getTypeImage = (type) => images[type][0];
 
-const MenuView = () => {
+const MenuScreen = () => {
   return (
     <View>
       <View style={{ borderBottomColor: 'silver', borderBottomWidth: 4, padding: 10 }}>
@@ -84,10 +84,8 @@ const MenuView = () => {
   );
 };
 
-const mapStateToProps = ({ modals, menu }) => ({ ...modals, ...menu });
+const mapStateToProps = ({ menu }) => ({ ...menu });
 
-const mapDispatchToProps = (dispatch) => ({
-  closeModal: () => dispatch({ type: "CLOSE_MODAL" })
-});
+const mapDispatchToProps = (dispatch) => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(MenuView);
+export default connect(mapStateToProps, mapDispatchToProps)(MenuScreen);

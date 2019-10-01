@@ -4,12 +4,9 @@ import { Modal, Text, View, Alert, TouchableOpacity } from 'react-native';
 import { Image } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const UserModal = () => {
+const UserScreen = () => {
   return (
-    <Modal
-      animationType="slide"
-      transparent={false}
-    >
+    <View>
       <View backgroundColor="black" style={{ flex: 1 }}>
         <View style={{ alignItems: 'center' }}>
           <Image
@@ -40,14 +37,12 @@ const UserModal = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </Modal >
+    </View>
   );
 };
 
-const mapStateToProps = ({ modals }) => modals;
+const mapStateToProps = () => ({});
 
-const mapDispatchToProps = (dispatch) => ({
-  closeModal: () => dispatch({ type: "CLOSE_MODAL" })
-});
+const mapDispatchToProps = (dispatch) => ({ });
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserModal);
+export default connect(mapStateToProps, mapDispatchToProps)(UserScreen);
