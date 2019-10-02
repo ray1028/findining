@@ -19,52 +19,56 @@ import Signup from "./src/components/Signup";
 import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
 import MapScreen from "./src/components/MapScreen";
-import Icon from "react-native-vector-icons/FontAwesome";
+// import { Icon } from "react-native-elements";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import Profile from "./src/components/Profile";
 import axios from "axios";
 import MenuScreen from "./src/components/MenuScreen";
 import UserScreen from "./src/components/UserScreen";
 import EventDetailScreen from "./src/components/EventDetailScreen";
 import { Menu } from "react-native-paper";
+import { createBottomTabNavigator } from "react-navigation-tabs";
 
 // bottom tab routes here may wanna moduliza later
-const MapNavigator = createMaterialBottomTabNavigator(
+const MapNavigator = createBottomTabNavigator(
   {
     Home: {
-      screen: MapScreen,
-      navigationOption: {
-        tabBarLabel: "Home",
-        tabBarIcon: ({ focused }) => (
-          <View>
-            <Icon name="user" size={35} color="white" />
-          </View>
-        )
-      }
+      screen: MapScreen
     },
     Camera: {
-      screen: withNavigationFocus(TextCamera),
-      navigationOption: {
-        tabBarLabel: "Camera",
-        tabBarIcon: ({ focused }) => (
-          <View>
-            <Icon name="user" size={35} />
-          </View>
-        )
-      }
+      screen: withNavigationFocus(TextCamera)
     },
     Setting: {
-      screen: Profile,
-      navigationOption: {
-        tabBarLabel: "Setting",
-        tabBarIcon: ({ focused }) => (
-          <View>
-            <Icon name="user" size={35} />
-          </View>
-        )
-      }
+      screen: Profile
     }
   },
   {
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, horizontal, tintColor }) => {
+        const { routeName } = navigation.state;
+        let IconComponent = Icon;
+        let iconName = "";
+
+        switch (routeName) {
+          case "Home":
+            iconName = "map";
+            break;
+          case "Camera":
+            iconName = "linked-camera";
+            break;
+          case "Setting":
+            iconName = "person-outline";
+            break;
+          default:
+            return;
+        }
+        return <IconComponent name={iconName} size={25} color={tintColor} />;
+      }
+    }),
+    tabBarOptions: {
+      activeTintColor: "tomato",
+      inactiveTintColor: "lightgrey"
+    },
     initialRouteName: "Home",
     order: ["Home", "Camera", "Setting"]
   }

@@ -36,7 +36,7 @@ let fakeUsersObj = [
 
 let location = {};
 
-const MapScreen = (props) => {
+const MapScreen = props => {
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== "granted") {
@@ -46,8 +46,6 @@ const MapScreen = (props) => {
     let location = await Location.getCurrentPositionAsync({});
     if (location) {
       console.log("should update state location " + JSON.stringify(location));
-      // findCurrentLocationHandler({ location });
-      // {"timestamp":1569511353910,"mocked":false,"coords":{"altitude":50.29999923706055,"heading":0,"longitude":-79.4021192,"speed":0,"latitude":43.6441615,"accuracy":15.651000022888184}}
     }
   };
 
@@ -83,7 +81,7 @@ const MapScreen = (props) => {
     >
       {fakeUsersObj.map(user => (
         <Marker
-          onPress={() => props.navigation.navigate('EventDetail')}
+          onPress={() => props.navigation.navigate("EventDetail")}
           key={user.id}
           coordinate={{
             latitude: user.latitude,

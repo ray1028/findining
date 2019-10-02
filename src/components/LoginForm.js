@@ -63,8 +63,7 @@ const LoginForm = props => {
         <Text style={styles.signupText}>
           Dont have an account?
           <TouchableWithoutFeedback
-            // onPress={() => props.navigation.navigate("Signup")}
-            onPress={() => props.navigation.navigate("UserView")}
+            onPress={() => props.navigation.navigate("Signup")}
           >
             <Text style={styles.signup}> Sign up now</Text>
           </TouchableWithoutFeedback>
