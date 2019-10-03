@@ -30,9 +30,9 @@ import { Menu } from "react-native-paper";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 
 // bottom tab routes here may wanna moduliza later
-const MapNavigator = createBottomTabNavigator(
+const MainNavigator = createBottomTabNavigator(
   {
-    Home: {
+    Map: {
       screen: MapScreen
     },
     Camera: {
@@ -50,7 +50,7 @@ const MapNavigator = createBottomTabNavigator(
         let iconName = "";
 
         switch (routeName) {
-          case "Home":
+          case "Map":
             iconName = "map";
             break;
           case "Camera":
@@ -69,8 +69,8 @@ const MapNavigator = createBottomTabNavigator(
       activeTintColor: "tomato",
       inactiveTintColor: "lightgrey"
     },
-    initialRouteName: "Home",
-    order: ["Home", "Camera", "Setting"]
+    initialRouteName: "Map",
+    order: ["Map", "Camera", "Setting"]
   }
 );
 
@@ -83,8 +83,8 @@ const AuthStack = createStackNavigator(
     Profile: { screen: Profile },
     EventDetail: { screen: EventDetailScreen },
     UserScreen: { screen: UserScreen },
-    TabNavigator: {
-      screen: MapNavigator,
+    MainNavigator: {
+      screen: MainNavigator,
       navigationOptions: {
         header: null
       }
@@ -96,7 +96,6 @@ const AuthStack = createStackNavigator(
   }
 );
 
-// MapNavigator
 
 const loginStateReducer = (state, action) => {
   if (state === undefined) return {};
@@ -156,7 +155,7 @@ const userProfileStateReducer = (state, action) => {
 };
 
 const cameraStateReducer = (state, action) => {
-  if (state === undefined) return { hasCameraPermission: null, bounds: [] };
+  if (state === undefined) return { hasCameraPermission: null, bounds: [{width: '10%', height: '10%', left: '40%', top: '40%' }] };
   switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
@@ -215,8 +214,7 @@ const reducer = combineReducers({
   cameraView: cameraStateReducer,
   userProfile: userProfileStateReducer,
   eventDetail: eventDetailReducer,
-  findUserCurrentLocation: userCurrentlocationStateReducer,
-  camera: cameraStateReducer
+  findUserCurrentLocation: userCurrentlocationStateReducer
 });
 
 const store = createStore(reducer);

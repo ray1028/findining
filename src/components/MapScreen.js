@@ -81,7 +81,7 @@ const MapScreen = props => {
     >
       {fakeUsersObj.map(user => (
         <Marker
-          onPress={() => props.navigation.navigate("EventDetail")}
+          onPress={() => props.navigation.navigate("EventDetail", { user: {} })}
           key={user.id}
           coordinate={{
             latitude: user.latitude,

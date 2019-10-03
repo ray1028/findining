@@ -6,18 +6,19 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const withAcceptReject = (Component) => {
   return (props) => {
+    const { onAccept, onReject } = props;
     return (
-      <View>
-        <Component {...props} style={{ height: '80%', background: 'transparent' }} />
-        <View style={{ backgroundColor: 'transparent', height: 280, zIndex: 1, position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around' }}>
-          <TouchableOpacity onPress={() => console.log("Accept")}>
+      <View style={{ flex: 1 }}>
+        <Component {...props} />
+        <View style={{ backgroundColor: 'transparent', height: 150, zIndex: 1, position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around' }}>
+          <TouchableOpacity onPress={onAccept}>
             <Icon
               name="check-circle"
               size={140}
               color="green"
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log("Reject")}>
+          <TouchableOpacity onPress={onReject}>
             <Icon
               name="times-circle"
               size={140}

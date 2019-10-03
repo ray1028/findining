@@ -57,7 +57,8 @@ const TextCamera = ({
   isFocused,
   setCameraPermission,
   dispatchUploadEvent,
-  dispatchResetCamera
+  dispatchResetCamera,
+  navigation
 }) => {
   useEffect(() => {
     // cleaning up camera
@@ -102,6 +103,7 @@ const TextCamera = ({
               return (
                 <TouchableOpacity
                   key={index}
+                  onPress={() => navigation.navigate('EventDetail')}
                   style={{ ...bound, position: "absolute", borderWidth: 3 }}
                 ></TouchableOpacity>
               );
@@ -121,7 +123,7 @@ const TextCamera = ({
                 dispatchUploadEvent({
                   image: photo.base64,
                   meta: photo.exif
-                });
+                });                
               }
             }}
           ></TouchableOpacity>

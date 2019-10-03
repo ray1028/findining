@@ -54,7 +54,7 @@ const LoginForm = props => {
       <TouchableOpacity
         activeOpacity={0.2}
         style={styles.submitButton}
-        onPress={() => props.navigation.navigate("TabNavigator")}
+        onPress={() => props.navigation.navigate("MainNavigator")}
       >
         <Text style={styles.submitText}>Sign in</Text>
       </TouchableOpacity>
