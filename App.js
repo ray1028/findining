@@ -1,12 +1,5 @@
 import React, { Component } from "react";
-import {
-  Text,
-  ActivityIndicatorComponent,
-  View,
-  Button,
-  Modal,
-  StyleSheet
-} from "react-native";
+import { Text, TouchableOpacity, ActivityIndicatorComponent, View, Button, Modal, StyleSheet } from "react-native";
 
 import { connect } from "react-redux";
 import Login from "./src/components/Login";
@@ -19,13 +12,13 @@ import Signup from "./src/components/Signup";
 import Home from "./src/components/Home";
 import TextCamera from "./src/components/TextCamera";
 import MapScreen from "./src/components/MapScreen";
-// import { Icon } from "react-native-elements";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Profile from "./src/components/Profile";
 import axios from "axios";
 import MenuScreen from "./src/components/MenuScreen";
 import UserScreen from "./src/components/UserScreen";
 import EventDetailScreen from "./src/components/EventDetailScreen";
+import StatusFooter from "./src/components/StatusFooter";
 import { Menu } from "react-native-paper";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 
@@ -155,7 +148,7 @@ const userProfileStateReducer = (state, action) => {
 };
 
 const cameraStateReducer = (state, action) => {
-  if (state === undefined) return { hasCameraPermission: null, bounds: [{width: '10%', height: '10%', left: '40%', top: '40%' }] };
+  if (state === undefined) return { hasCameraPermission: null, bounds: [] };
   switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
@@ -208,12 +201,24 @@ const eventDetailReducer = (state, action) => {
   }
 };
 
+const userStateReducer = (state, action) => {
+  if (state === undefined) return { status: 'WAITING' };
+
+  switch (action.type) {
+    case "SET_USER_STATUS":
+      return { ...state, status: action.status };
+    default:
+      return state;
+  }
+};
+
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
   cameraView: cameraStateReducer,
   userProfile: userProfileStateReducer,
   eventDetail: eventDetailReducer,
+  user: userStateReducer,
   findUserCurrentLocation: userCurrentlocationStateReducer
 });
 
@@ -221,22 +226,12 @@ const store = createStore(reducer);
 
 const AppNavigator = createAppContainer(AuthStack);
 
-const App = () => {
-  const styles = StyleSheet.create({
-    btn: {
-      borderWidth: 5
-    },
-    main: {
-      // paddingTop: 60,
-      display: "flex",
-      height: "100%",
-      borderWidth: 5
-    }
-  });
 
+const App = ({ user }) => {
   return (
     <View style={{ height: "100%", background: "black" }}>
       <AppNavigator />
+      <StatusFooter />
     </View>
   );
 };
