@@ -194,7 +194,7 @@ const Profile = ({
           buttonStyle={{
             backgroundColor: "orange",
             borderRadius: 40,
-            letterSpacing: 4,
+            // letterSpacing: 4,
             fontSize: 20
           }}
         />

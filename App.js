@@ -16,7 +16,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Profile from "./src/components/Profile";
 import axios from "axios";
 import { Notifications } from "expo";
-import * as Permissions from 'expo-permissions';
+import * as Permissions from "expo-permissions";
 import MenuScreen from "./src/components/MenuScreen";
 import UserScreen from "./src/components/UserScreen";
 import EventDetailScreen from "./src/components/EventDetailScreen";
@@ -24,6 +24,7 @@ import StatusFooter from "./src/components/StatusFooter";
 import { Menu } from "react-native-paper";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { SERVER_URI } from "./const";
+import { request, setSessionsToken } from "./src/helper/helper";
 
 // bottom tab routes here may wanna moduliza later
 const MainNavigator = createBottomTabNavigator(
@@ -92,34 +93,36 @@ const AuthStack = createStackNavigator(
   }
 );
 
-
-const askPermissionAsync = async (permissionType) => {
+const askPermissionAsync = async permissionType => {
   const { status: existingStatus } = await Permissions.getAsync(permissionType);
   if (existingStatus !== "granted") {
     const { status } = await Permissions.askAsync(permissionType);
-    if (status !== "granted") throw new Error("No permissions for push notification");
+    if (status !== "granted")
+      throw new Error("No permissions for push notification");
   }
 };
 
 const sendPushToken = async ({ id: userId }) => {
   await askPermissionAsync(Permissions.NOTIFICATIONS);
   const prevExpoPushToken = await AsyncStorage.getItem("ExpoPushToken");
-  const expoPushToken = prevExpoPushToken || (await Notifications.getExpoPushTokenAsync());
+  const expoPushToken =
+    prevExpoPushToken || (await Notifications.getExpoPushTokenAsync());
   if (!prevExpoPushToken) {
     await AsyncStorage.setItem("ExpoPushToken", expoPushToken);
   }
-  const resp = await axios({
-    method: 'post',
+  const resp = await request({
+    method: "post",
     url: `${SERVER_URI}/users/${userId}/token`,
-    data: { 'user_id': userId, 'expo_push_token': expoPushToken }
+    data: { user_id: userId, expo_push_token: expoPushToken }
   });
-  if (resp.status !== 200) throw new Error("Failed to send token to server");
-}
 
-const notificationSub = Notifications.addListener((notification) => {
+  if (resp.status !== 200) throw new Error("Failed to send token to server");
+};
+
+const notificationSub = Notifications.addListener(notification => {
   if (notification.origin === "received") {
     const { type } = notification.data;
-    if (type === 'Event') {
+    if (type === "Event") {
       const { event } = notification.data;
       store.dispatch({ type: "RECEIVE_EVENT", event });
     }
@@ -129,20 +132,64 @@ const notificationSub = Notifications.addListener((notification) => {
 const loginStateReducer = (state, action) => {
   if (state === undefined) return {};
   switch (action.type) {
-    case "SET_EMAIL":
-      return { ...state, userEmail: action.email };
-    case "SET_PASSWORD":
-      return { ...state, userPassword: action.password };
+    case "SET_LOGIN_CREDENTIALS":
+      async () => {
+        try {
+          const resp = await axios({
+            type: "post",
+            url: `${SERVER_URI}/users/`,
+            data: {
+              user: user
+            }
+          });
+        } catch (error) {
+          console.log("Login Error");
+        }
+        if (resp.status == 200) {
+          await setSessionsToken(resp.data.session_token);
+          return { ...state, currentUser: resp.data.user };
+        } else {
+          dispatch({
+            type: "SET_LOGIN_ERROR",
+            value: "User or Password Incorrect"
+          });
+        }
+      };
+    case "SET_LOGIN_ERROR":
+      return { ...state, errorMsg: action.value };
     default:
       return state;
   }
 };
 
 const signupStateReducer = (state, action) => {
-  if (state === undefined) return {};
+  if (state === undefined) return { currentUser: null };
   switch (action.type) {
-    case "SET_USERNAME":
-      return { ...state, signupNewUser: action.username };
+    case "SET_SIGNUP_CREDENTIALS":
+      (async () => {
+        try {
+          const resp = await axios({
+            method: "post",
+            url: `${SERVER_URI}/users`,
+            data: {
+              user: {
+                name: action.userName,
+                password: action.userPassword,
+                email: action.userEmail
+              }
+            }
+          });
+          if (resp.status != 200) {
+            throw new Error("Error while signing up");
+          }
+          await setSessionsToken(resp.data.session_token);
+        } catch (err) {
+          console.log("Error while signing up");
+        }
+      })();
+      // console.log("setting current user now");
+      return { ...state, currentUser: action.value };
+
     default:
       return state;
   }
@@ -184,7 +231,11 @@ const userProfileStateReducer = (state, action) => {
 };
 
 const cameraStateReducer = (state, action) => {
-  if (state === undefined) return { hasCameraPermission: null, bounds: [{ width: '10%', height: '10%', left: '40%', top: '40%' }] };
+  if (state === undefined)
+    return {
+      hasCameraPermission: null,
+      bounds: [{ width: "10%", height: "10%", left: "40%", top: "40%" }]
+    };
   switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
@@ -195,14 +246,13 @@ const cameraStateReducer = (state, action) => {
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
       (async () => {
-        const resp = await axios({
+        const resp = await request({
           method: "post",
           url: `${SERVER_URI}/images`,
           data: action.value
         });
         const bounds = resp.data.map(detection => {
           const bound = detection.geometry.boundingBox;
-          console.log(JSON.stringify(detection));
           return {
             height: `${bound.height * 100}%`,
             width: `${bound.width * 100}%`,
@@ -227,7 +277,7 @@ const cameraStateReducer = (state, action) => {
 };
 
 const eventDetailReducer = (state, action) => {
-  if (state === undefined) return { selectedScreen: 'User' };
+  if (state === undefined) return { selectedScreen: "User" };
 
   switch (action.type) {
     case "SET_EVENT_SCREEN":
@@ -238,7 +288,7 @@ const eventDetailReducer = (state, action) => {
 };
 
 const userStateReducer = (state, action) => {
-  if (state === undefined) return { status: 'WAITING', id: null };
+  if (state === undefined) return { status: "WAITING", id: null };
 
   switch (action.type) {
     case "SET_USER_ID":

@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  // KeyboardAvoidingView,
   View,
   Image,
   TouchableWithoutFeedback
@@ -11,6 +10,8 @@ import {
 import { Input } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { connect } from "react-redux";
+
+const user = {};
 
 const LoginForm = props => {
   return (
@@ -33,7 +34,7 @@ const LoginForm = props => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        onChangeText={props.changeEmailInput}
+        onChangeText={text => (user.email = text)}
       />
       <Input
         placeholder="Password"
@@ -49,12 +50,12 @@ const LoginForm = props => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        onChangeText={props.changePasswordInput}
+        onChangeText={text => (user.password = text)}
       />
       <TouchableOpacity
         activeOpacity={0.2}
         style={styles.submitButton}
-        onPress={() => props.login(props.navigation)}
+        onPress={() => props.dispatchLoginCredentials(user)}
       >
         <Text style={styles.submitText}>Sign in</Text>
       </TouchableOpacity>
@@ -82,12 +83,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    changeEmailInput: email => dispatch({ type: "SET_EMAIL", email }),
-    changePasswordInput: password =>
-      dispatch({ type: "SET_PASSWORD", password }),
-    login: (navigation) => {
-      dispatch({ type: "SET_USER_ID", uid: 1 });
-      navigation.navigate("MainNavigator");
+    dispatchLoginCredentials: user => {
+      dispatch({ type: "SET_LOGIN_CREDENTIALS", user });
     }
   };
 };

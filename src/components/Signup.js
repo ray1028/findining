@@ -1,9 +1,13 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, AsyncStorage } from "react-native";
 import FormWrap from "./FormWrap";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Input, Button } from "react-native-elements";
 import { connect } from "react-redux";
+
+let userName = "";
+let userEmail = "";
+let userPassword = "";
 
 const Signup = props => {
   return (
@@ -23,7 +27,8 @@ const Signup = props => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        onChangeText={props.changeUserName}
+        // onChangeText={props.changeUserName}
+        onChangeText={text => (userName = text)}
       />
       <Input
         placeholder="Email"
@@ -39,7 +44,8 @@ const Signup = props => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-      // onChangeText={props.changeEmailInput}
+        // onChangeText={props.changeEmailInput}
+        onChangeText={text => (userEmail = text)}
       />
       <Input
         placeholder="Password"
@@ -55,14 +61,17 @@ const Signup = props => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        onChangeText={props.changePasswordInput}
+        // onChangeText={props.changePasswordInput}
+        onChangeText={text => (userPassword = text)}
       />
       <Button
         title="Signup Now"
         type="clear"
         icon={<Icon name="plus" size={15} color="white" />}
         style={styles.signupButton}
-        onPress={() => props.login(props.navigation)}
+        onPress={() =>
+          props.dispatchSignupCredentials(userName, userPassword, userEmail)
+        }
       />
     </FormWrap>
   );
@@ -97,14 +106,14 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    changeUsernameInput: username =>
-      dispatch({ type: "SET_USERNAME", username }),
-    changeEmailInput: email => dispatch({ type: "SET_EMAIL", email }),
-    changePasswordInput: password =>
-      dispatch({ type: "SET_PASSWORD", password }),
-    login: (navigation) => {
-      dispatch({ type: "SET_USER_ID", uid: 1 });
-      navigation.navigate("Profile");
+    dispatchSignupCredentials: (userName, userEmail, userPassword) => {
+      dispatch({
+        type: "SET_SIGNUP_CREDENTIALS",
+        userName,
+        userEmail,
+        userPassword
+      });
+      // navigation.navigate("Profile");
     }
   };
 };

@@ -103,8 +103,14 @@ const TextCamera = ({
               return (
                 <TouchableOpacity
                   key={index}
-                  onPress={() => navigation.navigate('EventDetail')}
-                  style={{ ...bound, position: "absolute", borderWidth: 3 }}
+                  onPress={() => navigation.navigate("EventDetail")}
+                  style={{
+                    ...bound,
+                    position: "absolute",
+                    borderWidth: 2,
+                    borderColor: "orange",
+                    padding: 10
+                  }}
                 ></TouchableOpacity>
               );
             })}
@@ -123,7 +129,7 @@ const TextCamera = ({
                 dispatchUploadEvent({
                   image: photo.base64,
                   meta: photo.exif
-                });                
+                });
               }
             }}
           ></TouchableOpacity>
