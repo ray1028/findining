@@ -39,7 +39,7 @@ const Signup = props => {
             errorMessage="ENTER A VALID ERROR HERE"
           />
         }
-        // onChangeText={props.changeEmailInput}
+      // onChangeText={props.changeEmailInput}
       />
       <Input
         placeholder="Password"
@@ -62,7 +62,7 @@ const Signup = props => {
         type="clear"
         icon={<Icon name="plus" size={15} color="white" />}
         style={styles.signupButton}
-        onPress={() => props.navigation.navigate("Profile")}
+        onPress={() => props.login(props.navigation)}
       />
     </FormWrap>
   );
@@ -101,7 +101,11 @@ const mapDispatchToProps = dispatch => {
       dispatch({ type: "SET_USERNAME", username }),
     changeEmailInput: email => dispatch({ type: "SET_EMAIL", email }),
     changePasswordInput: password =>
-      dispatch({ type: "SET_PASSWORD", password })
+      dispatch({ type: "SET_PASSWORD", password }),
+    login: (navigation) => {
+      dispatch({ type: "SET_USER_ID", uid: 1 });
+      navigation.navigate("Profile");
+    }
   };
 };
 

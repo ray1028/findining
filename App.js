@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, TouchableOpacity, ActivityIndicatorComponent, View, Button, Modal, StyleSheet } from "react-native";
+import { Text, TouchableOpacity, View, AsyncStorage } from "react-native";
 
 import { connect } from "react-redux";
 import Login from "./src/components/Login";
@@ -15,12 +15,15 @@ import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Profile from "./src/components/Profile";
 import axios from "axios";
+import { Notifications } from "expo";
+import * as Permissions from 'expo-permissions';
 import MenuScreen from "./src/components/MenuScreen";
 import UserScreen from "./src/components/UserScreen";
 import EventDetailScreen from "./src/components/EventDetailScreen";
 import StatusFooter from "./src/components/StatusFooter";
 import { Menu } from "react-native-paper";
 import { createBottomTabNavigator } from "react-navigation-tabs";
+import { SERVER_URI } from "./const";
 
 // bottom tab routes here may wanna moduliza later
 const MainNavigator = createBottomTabNavigator(
@@ -90,6 +93,39 @@ const AuthStack = createStackNavigator(
 );
 
 
+const askPermissionAsync = async (permissionType) => {
+  const { status: existingStatus } = await Permissions.getAsync(permissionType);
+  if (existingStatus !== "granted") {
+    const { status } = await Permissions.askAsync(permissionType);
+    if (status !== "granted") throw new Error("No permissions for push notification");
+  }
+};
+
+const sendPushToken = async ({ id: userId }) => {
+  await askPermissionAsync(Permissions.NOTIFICATIONS);
+  const prevExpoPushToken = await AsyncStorage.getItem("ExpoPushToken");
+  const expoPushToken = prevExpoPushToken || (await Notifications.getExpoPushTokenAsync());
+  if (!prevExpoPushToken) {
+    await AsyncStorage.setItem("ExpoPushToken", expoPushToken);
+  }
+  const resp = await axios({
+    method: 'post',
+    url: `${SERVER_URI}/users/${userId}/token`,
+    data: { 'user_id': userId, 'expo_push_token': expoPushToken }
+  });
+  if (resp.status !== 200) throw new Error("Failed to send token to server");
+}
+
+const notificationSub = Notifications.addListener((notification) => {
+  if (notification.origin === "received") {
+    const { type } = notification.data;
+    if (type === 'Event') {
+      const { event } = notification.data;
+      store.dispatch({ type: "RECEIVE_EVENT", event });
+    }
+  }
+});
+
 const loginStateReducer = (state, action) => {
   if (state === undefined) return {};
   switch (action.type) {
@@ -148,7 +184,7 @@ const userProfileStateReducer = (state, action) => {
 };
 
 const cameraStateReducer = (state, action) => {
-  if (state === undefined) return { hasCameraPermission: null, bounds: [] };
+  if (state === undefined) return { hasCameraPermission: null, bounds: [{ width: '10%', height: '10%', left: '40%', top: '40%' }] };
   switch (action.type) {
     case "SET_CAMERA":
       return { ...state, camera: action.value };
@@ -161,7 +197,7 @@ const cameraStateReducer = (state, action) => {
       (async () => {
         const resp = await axios({
           method: "post",
-          url: "http://172.46.3.175:3000/images",
+          url: `${SERVER_URI}/images`,
           data: action.value
         });
         const bounds = resp.data.map(detection => {
@@ -202,11 +238,24 @@ const eventDetailReducer = (state, action) => {
 };
 
 const userStateReducer = (state, action) => {
-  if (state === undefined) return { status: 'WAITING' };
+  if (state === undefined) return { status: 'WAITING', id: null };
 
   switch (action.type) {
+    case "SET_USER_ID":
+      sendPushToken({ id: action.uid });
+      return { ...state, id: action.uid };
     case "SET_USER_STATUS":
       return { ...state, status: action.status };
+    default:
+      return state;
+  }
+};
+
+const eventsReducer = (state, action) => {
+  if (state === undefined) return { visible: [] };
+  switch (action.type) {
+    case "RECEIVE_EVENT":
+      return { ...state, visible: [...visible, action.event] };
     default:
       return state;
   }
@@ -218,6 +267,7 @@ const reducer = combineReducers({
   cameraView: cameraStateReducer,
   userProfile: userProfileStateReducer,
   eventDetail: eventDetailReducer,
+  events: eventsReducer,
   user: userStateReducer,
   findUserCurrentLocation: userCurrentlocationStateReducer
 });
@@ -226,21 +276,20 @@ const store = createStore(reducer);
 
 const AppNavigator = createAppContainer(AuthStack);
 
-
-const App = ({ user }) => {
-  return (
-    <View style={{ height: "100%", background: "black" }}>
-      <AppNavigator />
-      <StatusFooter />
-    </View>
-  );
-};
-
 const withProvider = AppComponent => {
   return () => (
     <Provider store={store}>
       <AppComponent />
     </Provider>
+  );
+};
+
+const App = () => {
+  return (
+    <View style={{ height: "100%", background: "black" }}>
+      <AppNavigator />
+      <StatusFooter />
+    </View>
   );
 };
 
