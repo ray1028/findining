@@ -23,22 +23,36 @@ const PanelNavigator = createSwitchNavigator({
 const mapStateToProps = ({ eventDetail }) => eventDetail;
 
 const mapDispatchToProps = (dispatch) => ({
-  navigatePaginate: (navigation, screen) => {
-    navigation.navigate(screen);
+  paginate: (screen) => {
     dispatch({ type: 'SET_EVENT_SCREEN', screen });
+  },
+  guestJoinEvent: () => {
+    dispatch({ type: "JOIN_EVENT" });
+  },
+  hostCreateEvent: () => {
+    dispatch({ type: "CREATE_EVENT" });
+  },
+  cancelEventSelection: () => {
+    dispatch({ type: "UNSET_OPEN_EVENT_RESTAURANT" });
   }
 })
 
 const OverlayEventGestureNavigator = connect(mapStateToProps, mapDispatchToProps)
-  (withAcceptReject(({ navigation, selectedScreen, navigatePaginate }) => {
+  (withAcceptReject(({ navigation, selectedScreen, paginate }) => {
     const config = {
       velocityThreshold: 0.1,
       directionalOffsetThreshold: 60
     };
     return (
       <GestureRecognizer
-        onSwipeRight={() => navigatePaginate(navigation, 'User')}
-        onSwipeLeft={() => navigatePaginate(navigation, 'Menu')}
+        onSwipeRight={() => {
+          navigation.navigate('User');
+          paginate('User');
+        }}
+        onSwipeLeft={() => {
+          navigation.navigate('Menu');
+          paginate('Menu');
+        }}
         config={config}
         style={{
           flex: 1,
@@ -58,27 +72,40 @@ OverlayEventGestureNavigator.router = PanelNavigator.router;
 
 const OverlayMenuScreen = withAcceptReject(MenuScreen)
 
-const EventWrapper = ({ navigation }) => {
-  const user = navigation.getParam('user', null);
-  const menuList = navigation.getParam('menuList', null);
-  if (user) {
-    return (
-      <OverlayEventGestureNavigator
-        navigation={navigation}
-        onAccept={() => navigation.navigate('MainNavigator')}
-        onReject={() => navigation.navigate('MainNavigator')}
-      />
-    );
-  } else {
-    return (
-      <OverlayMenuScreen
-        navigation={navigation}
-        onAccept={() => navigation.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'Map' }))}
-        onReject={() => navigation.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'Map' }))}
-      />
-    )
-  }
-}
+const EventWrapper = connect(mapStateToProps, mapDispatchToProps)
+  (({ navigation, hostCreateEvent, guestJoinEvent, cancelEventSelection }) => {
+    const user = navigation.getParam('user', null);
+    const menuList = navigation.getParam('menuList', null);
+    if (user) {
+      return (
+        <OverlayEventGestureNavigator
+          navigation={navigation}
+          onAccept={() => {
+            guestJoinEvent();
+            navigation.navigate('MainNavigator');
+          }}
+          onReject={() => {
+            cancelEventSelection();
+            navigation.navigate('MainNavigator');
+          }}
+        />
+      );
+    } else {
+      return (
+        <OverlayMenuScreen
+          navigation={navigation}
+          onAccept={() => {
+            hostCreateEvent();
+            navigation.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'Map' }));
+          }}
+          onReject={() => {
+            cancelEventSelection();
+            navigation.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'Map' }));
+          }}
+        />
+      )
+    }
+  });
 
 EventWrapper.router = OverlayEventGestureNavigator.router;
 

@@ -37,6 +37,7 @@ let fakeUsersObj = [
 let location = {};
 
 const MapScreen = props => {
+  const { events } = props;
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== "granted") {
@@ -79,29 +80,33 @@ const MapScreen = props => {
         longitudeDelta: 0.0421
       }}
     >
-      {fakeUsersObj.map(user => (
-        <Marker
-          onPress={() => props.navigation.navigate("EventDetail", { user: {} })}
-          key={user.id}
-          coordinate={{
-            latitude: user.latitude,
-            longitude: user.longitude
-          }}
-        >
-          <TouchableOpacity>
-            <Image
-              source={require("../assets/images/findining.png")}
-              style={{ width: 30, height: 30 }}
-            />
-          </TouchableOpacity>
-        </Marker>
-      ))}
+      {events.map(event => {
+        const { user, restaurant } = event;
+        return (
+          <Marker
+            onPress={() => props.navigation.navigate("EventDetail", { user, restaurant })}
+            key={user.id}
+            coordinate={{
+              latitude: restaurant.latlng.lat,
+              longitude: restaurant.latlng.lng
+            }}
+          >
+            <TouchableOpacity>
+              <Image
+                source={{ uri: user.profile_uri }}
+                style={{ width: 30, height: 30 }}
+              />
+            </TouchableOpacity>
+          </Marker>
+        );
+      })}
     </MapView>
   );
 };
 
 const mapStateToProps = state => ({
-  userCurrentLocation: state.findUserCurrentLocation.userCurrentLocation || ""
+  userCurrentLocation: state.findUserCurrentLocation.userCurrentLocation || "",
+  events: state.events.visible
 });
 
 const mapDispatchToProps = dispatch => {

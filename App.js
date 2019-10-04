@@ -252,10 +252,47 @@ const userStateReducer = (state, action) => {
 };
 
 const eventsReducer = (state, action) => {
-  if (state === undefined) return { visible: [] };
+  if (state === undefined) return { visible: [], resturantName: null, eventId: null };
   switch (action.type) {
+    case "FETCH_EVENTS":
+      (async () => {
+        const resp = await axios({
+          method: 'post',
+          url: `${SERVER_URI}/events/`
+        });
+        if (resp.status !== 200) throw new Error(resp.data.error);
+        store.dispatch({ type: "SET_EVENTS", events: resp.data });
+      })();
+      return state;
+    case "SET_EVENTS":
+      return { ...state, visible: action.events };
+    case "SET_OPEN_EVENT":
+      return { ...state, eventId: action.eventId };
+    case "SET_OPEN_RESTAURANT":
+      return { ...state, resturantName: action.resturantName };
     case "RECEIVE_EVENT":
       return { ...state, visible: [...visible, action.event] };
+    case "CREATE_EVENT":
+      (async () => {
+        const resp = await axios({
+          method: 'post',
+          url: `${SERVER_URI}/events`,
+          data: { 'resturant_name': resturantName }
+        });
+        if (resp.status !== 200) throw new Error(resp.data.error);
+      })();
+      return state;
+    case "JOIN_EVENT":
+      (async () => {
+        const resp = await axios({
+          method: 'post',
+          url: `${SERVER_URI}/events/${eventId}/join`
+        });
+        if (resp.status !== 200) throw new Error(resp.data.error);
+      })();
+      return state;
+    case "UNSET_OPEN_EVENT_RESTAURANT":
+      return { ...state, resturantName: null, eventId: null };
     default:
       return state;
   }
@@ -284,13 +321,20 @@ const withProvider = AppComponent => {
   );
 };
 
-const App = () => {
-  return (
-    <View style={{ height: "100%", background: "black" }}>
-      <AppNavigator />
-      <StatusFooter />
-    </View>
-  );
-};
+const mapStateToProps = ({ events }) => ({ ...events });
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" })
+})
+
+const App = connect(mapStateToProps, mapDispatchToProps)
+  (() => {
+    return (
+      <View style={{ height: "100%", background: "black" }}>
+        <AppNavigator />
+        <StatusFooter />
+      </View>
+    );
+  });
 
 export default withProvider(App);
