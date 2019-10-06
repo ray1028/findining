@@ -8,23 +8,25 @@ import UserScreen from "./UserScreen";
 import MenuScreen from "./MenuScreen";
 import withAcceptReject from "./withAcceptReject";
 
-const PanelNavigator = createSwitchNavigator({
-  User: UserScreen,
-  Menu: MenuScreen
-},
+const PanelNavigator = createSwitchNavigator(
+  {
+    User: UserScreen,
+    Menu: MenuScreen
+  },
   {
     initialRouteName: 'User',
     backBehavior: 'none',
     defaultNavigationOptions: {
       header: null
     }
-  });
+  }
+);
 
 const mapStateToProps = ({ eventDetail }) => eventDetail;
 
 const mapDispatchToProps = (dispatch) => ({
   paginate: (screen) => {
-    dispatch({ type: 'SET_EVENT_SCREEN', screen });
+    dispatch({ type: 'SET_EVENT_DETAIL_SCREEN', screen });
   },
   guestJoinEvent: () => {
     dispatch({ type: "JOIN_EVENT" });
@@ -33,7 +35,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch({ type: "CREATE_EVENT" });
   },
   cancelEventSelection: () => {
-    dispatch({ type: "UNSET_OPEN_EVENT_RESTAURANT" });
+    dispatch({ type: "CLOSE_EVENT_DETAIL_SCREEN" });
   }
 })
 
@@ -46,12 +48,12 @@ const OverlayEventGestureNavigator = connect(mapStateToProps, mapDispatchToProps
     return (
       <GestureRecognizer
         onSwipeRight={() => {
-          navigation.navigate('User');
           paginate('User');
+          navigation.navigate('User');
         }}
         onSwipeLeft={() => {
-          navigation.navigate('Menu');
           paginate('Menu');
+          navigation.navigate('Menu');
         }}
         config={config}
         style={{
@@ -73,9 +75,7 @@ OverlayEventGestureNavigator.router = PanelNavigator.router;
 const OverlayMenuScreen = withAcceptReject(MenuScreen)
 
 const EventWrapper = connect(mapStateToProps, mapDispatchToProps)
-  (({ navigation, hostCreateEvent, guestJoinEvent, cancelEventSelection }) => {
-    const user = navigation.getParam('user', null);
-    const menuList = navigation.getParam('menuList', null);
+  (({ navigation, user, restaurant, hostCreateEvent, guestJoinEvent, cancelEventSelection }) => {
     if (user) {
       return (
         <OverlayEventGestureNavigator
