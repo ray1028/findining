@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { FlatList, Text, View, Alert, TouchableOpacity } from "react-native";
 import { Image, ListItem, Badge } from "react-native-elements";
@@ -7,25 +7,39 @@ const desc = [
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
   "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
-]
+];
 
 const images = {
-  "burger": ["https://b.zmtcdn.com/data/reviews_photos/e67/c046885fc6431cd395a7214179637e67.jpg?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A"],
-  "sandwich": ["https://b.zmtcdn.com/data/reviews_photos/03a/23f47131f6d494ce0854b25d9145103a_1565997520.jpg?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A"],
-  "wrap": ["https://i.pinimg.com/236x/bf/2e/50/bf2e506e890bab3829221b86c65f6d34.jpg"],
-  "poutine": ["https://b.zmtcdn.com/data/reviews_photos/23d/107c524ad831597fe5c38e36cd18223d.jpg?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A"],
-  "fish_and_chips": ["https://i.pinimg.com/236x/3b/ef/58/3bef58f20428e39ef358f5af0372dab8.jpg"],
-  "onion_rings": ["https://i.pinimg.com/474x/ac/f7/11/acf711c88aa144e1a17558f210a5a4e5--the-nest-side-recipes.jpg"],
-  "fries": ["https://photos.bigoven.com/recipe/hero/all-star-french-fries-dd49eb.jpg?h=500&w=500"]
+  burger: [
+    "https://b.zmtcdn.com/data/reviews_photos/e67/c046885fc6431cd395a7214179637e67.jpg?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A"
+  ],
+  sandwich: [
+    "https://b.zmtcdn.com/data/reviews_photos/03a/23f47131f6d494ce0854b25d9145103a_1565997520.jpg?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A"
+  ],
+  wrap: [
+    "https://i.pinimg.com/236x/bf/2e/50/bf2e506e890bab3829221b86c65f6d34.jpg"
+  ],
+  poutine: [
+    "https://b.zmtcdn.com/data/reviews_photos/23d/107c524ad831597fe5c38e36cd18223d.jpg?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A"
+  ],
+  fish_and_chips: [
+    "https://i.pinimg.com/236x/3b/ef/58/3bef58f20428e39ef358f5af0372dab8.jpg"
+  ],
+  onion_rings: [
+    "https://i.pinimg.com/474x/ac/f7/11/acf711c88aa144e1a17558f210a5a4e5--the-nest-side-recipes.jpg"
+  ],
+  fries: [
+    "https://photos.bigoven.com/recipe/hero/all-star-french-fries-dd49eb.jpg?h=500&w=500"
+  ]
 };
 
 const resturant = {
   name: "Scotland Yard",
-  averageCostPerPerson: 33.25,
-  averageCostPerPint: 6.19,
-  accepts: ["CASH", "CREDIT", "DEBIT"],
-  openHour: '10am',
-  closeHour: '2pm',
+  // averageCostPerPerson: 33.25,
+  // averageCostPerPint: 6.19,
+  // accepts: ["CASH", "CREDIT", "DEBIT"],
+  openHour: "10am",
+  closeHour: "2pm",
   menu: [
     { name: "Turkey Club", desc: desc[0], type: "sandwich" },
     { name: "Onion Rings", desc: desc[0], type: "onion_rings" },
@@ -43,49 +57,77 @@ const resturant = {
   ]
 };
 
-//     <Text style={{ fontSize: 16 }}>{item.desc}</Text>
-// <Image source={{ uri: getTypeImage(item.type) }} style={{ width: 120, height: 120 }} />
-// <View style={{ paddingLeft: 20, flex: -1 }}>
-//   <Text style={{ fontSize: 20, fontStyle: 'italic' }}>{item.name}</Text>
-//   <Text style={{ fontSize: 16 }}>{item.desc}</Text>
-// </View>
+const getTypeImage = type => images[type][0];
 
-// const getTypeImage = (type) => images[type][Math.round(Math.random() * (images[type].length - 1))];
-const getTypeImage = (type) => images[type][0];
+const MenuScreen = ({
+  dispatchSetRestaurant,
+  currentRestaurant,
+  currentMenuItems,
+  dispatchSetMenuItem
+}) => {
+  useEffect(() => {
+    if (currentMenuItems.length < 1) {
+      // for testing , this should come from event
+      let restaurant_id = 1;
+      dispatchSetRestaurant(restaurant_id);
+      dispatchSetMenuItem(restaurant_id);
+    }
+  }, []);
 
-const MenuScreen = () => {
   return (
     <View>
-      <View style={{ borderBottomColor: 'silver', borderBottomWidth: 4, padding: 10 }}>
-        <Text style={{ fontSize: 34, fontWeight: 'bold', textAlign: 'center' }} >{resturant.name}</Text>
-        <Text style={{ fontSize: 12, fontStyle: 'italic', textAlign: 'center' }} >{resturant.openHour} - {resturant.closeHour}</Text>
-      </View>
-      <FlatList
-        style={{ paddingTop: 10 }}
-        data={resturant.menu}
-        keyExtractor={(item, i) => i}
-        renderItem={({ item }) => {
-          return (
-            <ListItem
-              leftAvatar={{
-                rounded: true,
-                source: { uri: getTypeImage(item.type) },
-                size: "large"
-              }}
-              title={item.name}
-              subtitle={item.desc}
-              bottomDivider={true}
-              badge={{ status: "primary" }}
-            />
-          );
+      <View
+        style={{
+          borderBottomColor: "silver",
+          borderBottomWidth: 4,
+          padding: 10
         }}
-      />
-    </View >
+      >
+        <Text style={{ fontSize: 34, fontWeight: "bold", textAlign: "center" }}>
+          {currentRestaurant.name}
+        </Text>
+        <Text
+          style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}
+        >
+          {resturant.openHour} - {resturant.closeHour}
+        </Text>
+      </View>
+      {/* not printing menu */}
+      {currentMenuItems && (
+        <FlatList
+          style={{ paddingTop: 10 }}
+          data={currentMenuItems}
+          renderItem={({ item }) => {
+            return (
+              <ListItem
+                leftAvatar={{
+                  rounded: true,
+                  source: { uri: item.image_uri },
+                  size: "large"
+                }}
+                title={item.name}
+                subtitle={item.description}
+                bottomDivider={true}
+                badge={{ status: "primary" }}
+              />
+            );
+          }}
+          keyExtractor={item => item.id}
+        />
+      )}
+    </View>
   );
 };
 
-const mapStateToProps = ({ menu }) => ({ ...menu });
+const mapStateToProps = ({ restaurantMenu }) => restaurantMenu;
 
-const mapDispatchToProps = (dispatch) => ({});
+const mapDispatchToProps = dispatch => ({
+  dispatchSetRestaurant: id =>
+    dispatch({ type: "ACTION_RESTAURANT", value: id }),
+  dispatchSetMenuItem: id => dispatch({ type: "ACTION_MENU_ITEMS", value: id })
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(MenuScreen);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MenuScreen);

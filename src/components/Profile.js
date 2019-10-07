@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, ImageBackground } from "react-native";
 import { Input, Icon, Avatar, withBadge, Button } from "react-native-elements";
 import { connect } from "react-redux";
@@ -17,51 +17,61 @@ const options = [
 
 const interests = [
   {
+    id: 1,
     key: "finance",
     name: "finance",
     type: "material-community"
   },
   {
+    id: 2,
     key: "sports",
     name: "soccer-ball-o",
     type: "font-awesome"
   },
   {
+    id: 3,
     key: "date",
     name: "heart-o",
     type: "font-awesome"
   },
   {
+    id: 4,
     key: "tech",
     name: "code",
     type: "entypo"
   },
   {
+    id: 5,
     key: "art",
     name: "paint-brush",
     type: "font-awesome"
   },
   {
+    id: 6,
     key: "health",
     name: "food-variant",
     type: "material-community"
   },
   {
+    id: 7,
     key: "music",
     name: "music",
     type: "font-awesome"
   },
   {
+    id: 8,
     key: "travel",
     name: "plane",
     type: "font-awesome"
   },
   {
+    id: 9,
     key: "book",
     name: "book",
     type: "font-awesome"
   },
   {
+    id: 10,
     key: "gym",
     name: "dumbbell",
     type: "material-community"
@@ -92,8 +102,55 @@ const Profile = ({
   userInterests,
   removeInterestHandler,
   usernameChangeHandler,
-  navigation
+  navigation,
+  // current logged in user and user interestss
+  dispatchNewUserInterests,
+  dispatchUpdateUserInterests,
+  currentUserInterests,
+  currentUser,
+  userName,
+  dispatchFetchInterests,
+  allInterests,
+  currentUserAndInterests
 }) => {
+  useEffect(() => {
+    // console.log(
+    //   "coming from " +
+    //     Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
+    // );
+    // Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1] ===
+    // "Signup"
+    //   ? dispatchNewUserInterests(currentUser.id)
+    //   : dispatchUpdateUserInterests(currentUser.id);
+    dispatchFetchInterests();
+  }, []);
+
+  const setUserProfile = () => {
+    console.log(
+      "current user and interests " + JSON.stringify(currentUserAndInterests)
+    );
+
+    userInterests = {
+      id: currentUser.id,
+      name: userName,
+      gender: checked,
+      interests: userInterests
+    };
+
+    console.log(
+      "coming from " +
+        Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
+    );
+
+    // Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1] ===
+    // "Signup"
+    //   ? dispatchNewUserInterests(currentUser.id)
+    //   : dispatchUpdateUserInterests(currentUser.id);
+
+    dispatchNewUserInterests(userInterests);
+  };
+
+  console.log("all interets " + JSON.stringify(allInterests));
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
@@ -167,16 +224,16 @@ const Profile = ({
                 key={interest.key}
                 style={styles.iconContainer}
                 onPress={() => {
-                  !userInterests.includes(interest.key)
-                    ? pushInterestsHandler(interest.key)
-                    : removeInterestHandler(interest.key);
+                  !userInterests.includes(interest.id)
+                    ? pushInterestsHandler(interest.id)
+                    : removeInterestHandler(interest.id);
                 }}
               >
                 <Icon
                   type={interest.type}
                   name={interest.name}
                   iconStyle={{
-                    color: userInterests.includes(interest.key)
+                    color: userInterests.includes(interest.id)
                       ? "orange"
                       : "white"
                   }}
@@ -194,9 +251,9 @@ const Profile = ({
           buttonStyle={{
             backgroundColor: "orange",
             borderRadius: 40,
-            // letterSpacing: 4,
             fontSize: 20
           }}
+          onPress={() => setUserProfile()}
         />
       </View>
     </View>
@@ -214,7 +271,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white"
   },
   userIcon: {
-    // width: ,
     height: "100%",
     aspectRatio: 1,
     borderRadius: 60
@@ -270,8 +326,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   return {
-    checked: state.userProfile.genderChecked || "",
-    userInterests: state.userProfile.userInterests
+    checked: state.userProfile.genderChecked,
+    userInterests: state.userProfile.userInterests,
+    useName: state.userProfile.username,
+    currentUserInterests: state.userProfile.currentUserInterests,
+    currentUser: state.loginCredentials.currentUser,
+    allInterests: state.userProfile.allInterests,
+    currentUserAndInterests: state.userProfile.currentUserAndInterests
   };
 };
 
@@ -283,7 +344,18 @@ const mapDispatchToProps = dispatch => {
     pushInterestsHandler: interest =>
       dispatch({ type: "SET_INTEREST", interest }),
     removeInterestHandler: interest =>
-      dispatch({ type: "REMOVE_INTEREST", interest })
+      dispatch({ type: "REMOVE_INTEREST", interest }),
+    dispatchGetUsersInterests: id =>
+      dispatch({ type: " ACTION_USER_INTERESTS", value: id }),
+
+    dispatchNewUserInterests: newUserInterests =>
+      dispatch({ type: "SET_NEW_USER_INTERESTS", value: newUserInterests }),
+    dispatchUpdateUserInterests: updatedUserInterests =>
+      dispatch({
+        type: "UPDATE_NEW_USER_INTERESTS",
+        value: updatedUserInterests
+      }),
+    dispatchFetchInterests: () => dispatch({ type: "ACTION_FETCH_INTERESTS" })
   };
 };
 

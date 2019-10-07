@@ -11,9 +11,11 @@ import { Input } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { connect } from "react-redux";
 
+// import NavigationService from "../../NavigationService";
+
 const user = {};
 
-const LoginForm = props => {
+const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
   return (
     <View style={styles.formContainer}>
       <Image
@@ -55,7 +57,11 @@ const LoginForm = props => {
       <TouchableOpacity
         activeOpacity={0.2}
         style={styles.submitButton}
-        onPress={() => props.dispatchLoginCredentials(user)}
+        onPress={() => {
+          console.log("hello");
+          dispatchLoginCredentials(user);
+          // currentUser && NavigationService.navigate("MainNavigator");
+        }}
       >
         <Text style={styles.submitText}>Sign in</Text>
       </TouchableOpacity>
@@ -64,9 +70,9 @@ const LoginForm = props => {
         <Text style={styles.signupText}>
           Dont have an account?
           <TouchableWithoutFeedback
-            onPress={() => props.navigation.navigate("Signup")}
+            onPress={() => navigation.navigate("Signup")}
           >
-            <Text style={styles.signup}> Sign up now</Text>
+            <Text style={styles.signup}> Sign up now </Text>
           </TouchableWithoutFeedback>
         </Text>
       </View>
@@ -74,17 +80,15 @@ const LoginForm = props => {
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    userEmail: state.loginCredentials.userEmail || "",
-    userPassword: state.loginCredentials.userPassword || ""
-  };
+const mapStateToProps = ({ loginCredentials }) => {
+  console.log("whats in " + JSON.stringify(loginCredentials));
+  return loginCredentials;
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     dispatchLoginCredentials: user => {
-      dispatch({ type: "SET_LOGIN_CREDENTIALS", user });
+      dispatch({ type: "ACTION_LOGIN_CREDENTIALS", value: user });
     }
   };
 };

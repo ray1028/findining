@@ -26,6 +26,8 @@ import { createBottomTabNavigator } from "react-navigation-tabs";
 import { SERVER_URI } from "./const";
 import { request, setSessionsToken } from "./src/helper/helper";
 
+import NavigationService from "./NavigationService";
+
 // bottom tab routes here may wanna moduliza later
 const MainNavigator = createBottomTabNavigator(
   {
@@ -130,33 +132,52 @@ const notificationSub = Notifications.addListener(notification => {
 });
 
 const loginStateReducer = (state, action) => {
-  if (state === undefined) return {};
+  if (state === undefined) return { currentUser: "" };
   switch (action.type) {
     case "SET_LOGIN_CREDENTIALS":
-      async () => {
+      return { ...state, currentUser: action.value };
+    case "ACTION_LOGIN_CREDENTIALS":
+      (async () => {
         try {
           const resp = await axios({
-            type: "post",
-            url: `${SERVER_URI}/users/`,
+            method: "post",
+            url: `${SERVER_URI}/login`,
             data: {
-              user: user
+              user: action.value
             }
           });
+          if (resp.status == 200) {
+            await setSessionsToken(resp.data.session_token);
+            const userEmail = resp.data.user.email;
+            const userId = resp.data.user.id;
+
+            if (userEmail) {
+              store.dispatch({
+                type: "SET_LOGIN_CREDENTIALS",
+                value: {
+                  id: userId,
+                  email: userEmail
+                }
+              });
+              NavigationService.navigate("MainNavigator");
+            }
+          }
+
+          // else {
+          //   store.dispatch({
+          //     type: "SET_LOGIN_ERROR",
+          //     value: "User or Password Incorrect"
+          //   });
+          // }
         } catch (error) {
           console.log("Login Error");
         }
-        if (resp.status == 200) {
-          await setSessionsToken(resp.data.session_token);
-          return { ...state, currentUser: resp.data.user };
-        } else {
-          dispatch({
-            type: "SET_LOGIN_ERROR",
-            value: "User or Password Incorrect"
-          });
-        }
-      };
-    case "SET_LOGIN_ERROR":
-      return { ...state, errorMsg: action.value };
+      })();
+
+    // set error by itself ?
+    // case "SET_LOGIN_ERROR":
+    //   return { ...state, errorMsg: action.value };
+
     default:
       return state;
   }
@@ -165,29 +186,26 @@ const loginStateReducer = (state, action) => {
 const signupStateReducer = (state, action) => {
   if (state === undefined) return { currentUser: null };
   switch (action.type) {
-    case "SET_SIGNUP_CREDENTIALS":
+    case "ACTION_SIGNUP_CREDENTIALS":
       (async () => {
         try {
           const resp = await axios({
             method: "post",
             url: `${SERVER_URI}/users`,
-            data: {
-              user: {
-                name: action.userName,
-                password: action.userPassword,
-                email: action.userEmail
-              }
-            }
+            data: { user: action.value }
           });
           if (resp.status != 200) {
             throw new Error("Error while signing up");
           }
           await setSessionsToken(resp.data.session_token);
+          return { ...state, currentUser: action.value };
         } catch (err) {
-          console.log("Error while signing up");
+          console.log("Error while signing up + " + err);
         }
       })();
-      // console.log("setting current user now");
+      NavigationService.navigate("Profile");
+      return state;
+    case "SET_NEW_USER":
       return { ...state, currentUser: action.value };
 
     default:
@@ -196,7 +214,8 @@ const signupStateReducer = (state, action) => {
 };
 
 const userCurrentlocationStateReducer = (state, action) => {
-  if (state === undefined) return { userCurrentLocation: null };
+  if (state === undefined)
+    return { userCurrentLocation: null, currentUserInterests: null };
   switch (action.type) {
     case "SET_LOCATION":
       return { ...state, userCurrentLocation: action.location };
@@ -206,9 +225,31 @@ const userCurrentlocationStateReducer = (state, action) => {
 };
 
 const userProfileStateReducer = (state, action) => {
-  if (state === undefined) return { userInterests: [], genderChecked: null };
+  if (state === undefined)
+    return { userInterests: [], genderChecked: null, allInterests: [] };
 
   switch (action.type) {
+    case "ACTION_FETCH_INTERESTS":
+      (async () => {
+        const interestsResp = await request({
+          method: "get",
+          url: `${SERVER_URI}/interests`
+        });
+        if (interestsResp.status !== 200) {
+          throw new Error("Error while fetching interests data");
+        }
+        const interests = interestsResp.data;
+        if (interests.length > 0) {
+          store.dispatch({ type: "SET_ALL_INTERESTS", value: interests });
+        } else {
+          throw new Error("Error - Check database");
+        }
+      })();
+      return state;
+
+    case "SET_ALL_INTERESTS":
+      return { ...state, allInterests: action.value };
+
     case "SET_GENDER_CHECKED":
       return { ...state, genderChecked: action.check };
     case "SET_USERNAME":
@@ -225,6 +266,84 @@ const userProfileStateReducer = (state, action) => {
           interest => interest !== action.interest
         )
       };
+
+    // userInterests = {
+    //   id: currentUser.id,
+    //   name: userName,
+    //   gender: checked,
+    //   interests: userInterests
+    // };
+    case "SET_NEW_USER_INTERESTS":
+      //new
+      (async () => {
+        const newUserInterestsResp = await request({
+          method: "post",
+          url: `${SERVER_URI}/user_interests`,
+          data: {
+            user_interests: {
+              user_id: action.value.id,
+              username: action.value.name,
+              user_gender: action.value.gender,
+              interests: action.value.interests
+            }
+          }
+        });
+        if (newUserInterestsResp.status !== 200) {
+          throw new Error("Error while posting user_interests");
+        }
+
+        store.dispatch({
+          type: "SET_CURRENT_USER_INTERESTS",
+          value: newUserInterestsResp.data
+        });
+
+        console.log("finish posting user_inerests happy");
+      })();
+      return state;
+
+    // probally dont have to do this cuz we have user interests above already
+    case "SET_CURRENT_USER_INTERESTS":
+      return { ...state, currentUserAndInterests: action.value };
+
+    // NEW CHANGES START HERE
+    // case "SET_NEW_USER_INTERESTS":
+    //   // retrieve current user interests
+    //   (async () => {
+    //     const currentUserInterestsResp = await request({
+    //       method: "get",
+    //       url: `${SERVER_URI}/users/${action.value}`
+    //     });
+
+    //     console.log("profile user object is " + action.value);
+
+    //     if (currentUserInterestsResp.status !== 200) {
+    //       throw new Error("error while fetching user interests");
+    //     } else {
+    //       const userInterests = currentUserInterestsResp.data;
+    //       store.dispatch({ type: "SET_USER_INTEREST", action: userInterests });
+    //     }
+    //   })();
+    // case "SET_USER_INTEREST":
+    //   return { ...state, currentUserInterests: action.value };
+    // OLDN CHANGES START HERE
+    // case "UPDATE_USER_INTERESTS":
+    //   Promise.all([
+    //     Promise.resolve(
+    //       request({
+    //         method: "PATCH",
+    //         url: `${SERVER_URI}/users/${action.value.id}`,
+    //         data: action.value
+    //       })
+    //     ),
+    //     // intrests
+    //     Promise.resolve(
+    //       request({
+    //         method: "PATCH",
+    //         url: `${SERVER_URI}/user_interests/${action.value.id}`,
+    //         data: action.value
+    //       })
+    //     )
+    //   ]);
     default:
       return state;
   }
@@ -311,6 +430,63 @@ const eventsReducer = (state, action) => {
   }
 };
 
+const restaurantMenuReducer = (state, action) => {
+  if (state === undefined)
+    return { currentMenuItems: [], currentRestaurant: {} };
+  switch (action.type) {
+    case "ACTION_RESTAURANT":
+      (async () => {
+        const restaurantResp = await request({
+          method: "get",
+          url: `${SERVER_URI}/restaurants/${action.value}`
+        });
+
+        if (restaurantResp.status !== 200) {
+          throw new Error("Error occurs while fetching restaurant data");
+        }
+        const restaurant = restaurantResp.data;
+        if (restaurant) {
+          store.dispatch({
+            type: "SET_RESTAURANT",
+            value: restaurant
+          });
+        }
+      })();
+
+      return state;
+    case "SET_RESTAURANT":
+      return { ...state, currentRestaurant: action.value };
+
+    case "ACTION_MENU_ITEMS":
+      (async () => {
+        const menuItemsResp = await request({
+          method: "get",
+          url: `${SERVER_URI}/restaurants/${action.value}/items`
+        });
+
+        if (menuItemsResp.status !== 200) {
+          throw new Error("Error occurs while fetching restaurant data");
+        }
+        // duno why
+        const menuItems = menuItemsResp.data;
+        console.log("Menu FROM SERVER is " + JSON.stringify(menuItems));
+        if (menuItems.length > 0) {
+          store.dispatch({
+            type: "SET_MENU_ITEMS",
+            value: menuItems
+          });
+        }
+      })();
+
+      return state;
+    case "SET_MENU_ITEMS":
+      console.log("action value is currently " + action.value);
+      return { ...state, currentMenuItems: action.value };
+    default:
+      return state;
+  }
+};
+
 const reducer = combineReducers({
   loginCredentials: loginStateReducer,
   signupNewUser: signupStateReducer,
@@ -319,7 +495,9 @@ const reducer = combineReducers({
   eventDetail: eventDetailReducer,
   events: eventsReducer,
   user: userStateReducer,
-  findUserCurrentLocation: userCurrentlocationStateReducer
+  findUserCurrentLocation: userCurrentlocationStateReducer,
+  restaurantMenu: restaurantMenuReducer
+  // userInterests: userInterestsReducer
 });
 
 const store = createStore(reducer);
@@ -337,7 +515,11 @@ const withProvider = AppComponent => {
 const App = () => {
   return (
     <View style={{ height: "100%", background: "black" }}>
-      <AppNavigator />
+      <AppNavigator
+        ref={navigatorRef => {
+          NavigationService.setTopLevelNavigator(navigatorRef);
+        }}
+      />
       <StatusFooter />
     </View>
   );

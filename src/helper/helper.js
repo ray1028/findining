@@ -1,20 +1,22 @@
 import axios from "axios";
-import {AsyncStorage} from react-native
+import { AsyncStorage } from "react-native";
 
-const request = async (params) => {
+const request = async params => {
   return axios({
     ...params,
-    headers: {...params.headers, token: await AsyncStorage.getItem('session_token')}
+    headers: {
+      ...params.headers,
+      "X-Token": await AsyncStorage.getItem("session_token")
+    }
   });
 };
 
-const setSessionsToken = async (token) => {
+const setSessionsToken = async token => {
   try {
-    await AsyncStorage.setItem('session_token', token);
+    await AsyncStorage.setItem("session_token", token);
   } catch (error) {
-    console.log('Error while setting token')
+    console.log("Error while setting token");
   }
-  
-}
+};
 
-export {request , setSessionsToken};
+export { request, setSessionsToken };

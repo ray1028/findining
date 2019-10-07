@@ -5,11 +5,8 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { Input, Button } from "react-native-elements";
 import { connect } from "react-redux";
 
-let userName = "";
-let userEmail = "";
-let userPassword = "";
-
-const Signup = props => {
+const user = {};
+const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
   return (
     <FormWrap style={styles.signupContainer}>
       <Icon name="user-plus" color="white" size={60} style={styles.icon} />
@@ -28,7 +25,7 @@ const Signup = props => {
           />
         }
         // onChangeText={props.changeUserName}
-        onChangeText={text => (userName = text)}
+        onChangeText={text => (user.name = text)}
       />
       <Input
         placeholder="Email"
@@ -45,7 +42,7 @@ const Signup = props => {
           />
         }
         // onChangeText={props.changeEmailInput}
-        onChangeText={text => (userEmail = text)}
+        onChangeText={text => (user.email = text)}
       />
       <Input
         placeholder="Password"
@@ -62,16 +59,19 @@ const Signup = props => {
           />
         }
         // onChangeText={props.changePasswordInput}
-        onChangeText={text => (userPassword = text)}
+        onChangeText={text => (user.password = text)}
       />
       <Button
         title="Signup Now"
         type="clear"
         icon={<Icon name="plus" size={15} color="white" />}
         style={styles.signupButton}
-        onPress={() =>
-          props.dispatchSignupCredentials(userName, userPassword, userEmail)
-        }
+        onPress={() => {
+          dispatchSignupCredentials(user);
+          console.log("current user is " + JSON.stringify(currentUser));
+          // currentUser && navigation.navigate("MainNavigator");
+          currentUser && navigation.navigate("Profile");
+        }}
       />
     </FormWrap>
   );
@@ -96,22 +96,14 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = state => {
-  return {
-    userName: state.signupNewUser.userName || "",
-    userEmail: state.signupNewUser.userEmail || "",
-    userPassword: state.signupNewUser.userPassword || ""
-  };
-};
+const mapStateToProps = ({ signupNewUser }) => signupNewUser;
 
 const mapDispatchToProps = dispatch => {
   return {
-    dispatchSignupCredentials: (userName, userEmail, userPassword) => {
+    dispatchSignupCredentials: user => {
       dispatch({
-        type: "SET_SIGNUP_CREDENTIALS",
-        userName,
-        userEmail,
-        userPassword
+        type: "ACTION_SIGNUP_CREDENTIALS",
+        value: user
       });
       // navigation.navigate("Profile");
     }
