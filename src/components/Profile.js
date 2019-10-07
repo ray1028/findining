@@ -118,6 +118,7 @@ const Profile = ({
   useEffect(() => {
     dispatchFetchInterests();
     dispatchFetchUserProfile(currentUser.id);
+    console.log("Current user is *******" + JSON.stringify(currentUser));
   }, [currentUser]);
 
   const setUserProfile = () => {

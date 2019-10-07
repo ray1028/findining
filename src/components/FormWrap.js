@@ -11,7 +11,7 @@ const FormWrap = props => {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    backgroundColor: "#1d2c38",
+    backgroundColor: "#3D2B3D",
     // backgroundColor: "#7a42f4",
     flex: 1,
     width: "100%",

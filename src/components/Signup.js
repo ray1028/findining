@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, AsyncStorage } from "react-native";
 import FormWrap from "./FormWrap";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { Input, Button } from "react-native-elements";
+import { Input, Button, Image } from "react-native-elements";
 import { connect } from "react-redux";
 
 const user = {};
@@ -10,6 +10,10 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
   return (
     <FormWrap style={styles.signupContainer}>
       <Icon name="user-plus" color="white" size={60} style={styles.icon} />
+      <Image
+        style={styles.logo}
+        source={require("../assets/images/findining.png")}
+      />
       <Input
         placeholder="Name"
         autoCorrect={false}
