@@ -110,27 +110,22 @@ const Profile = ({
   currentUser,
   userName,
   dispatchFetchInterests,
-  allInterests,
-  currentUserAndInterests
+  // allInterests,
+  currentUserAndInterests,
+  dispatchFetchUserProfile,
+  interestProfile
 }) => {
   useEffect(() => {
-    // console.log(
-    //   "coming from " +
-    //     Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
-    // );
-    // Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1] ===
-    // "Signup"
-    //   ? dispatchNewUserInterests(currentUser.id)
-    //   : dispatchUpdateUserInterests(currentUser.id);
     dispatchFetchInterests();
-  }, []);
+    dispatchFetchUserProfile(currentUser.id);
+  }, [currentUser]);
 
   const setUserProfile = () => {
     console.log(
       "current user and interests " + JSON.stringify(currentUserAndInterests)
     );
 
-    userInterests = {
+    userInterestsObj = {
       id: currentUser.id,
       name: userName,
       gender: checked,
@@ -147,10 +142,11 @@ const Profile = ({
     //   ? dispatchNewUserInterests(currentUser.id)
     //   : dispatchUpdateUserInterests(currentUser.id);
 
-    dispatchNewUserInterests(userInterests);
+    dispatchNewUserInterests(userInterestsObj);
   };
 
-  console.log("all interets " + JSON.stringify(allInterests));
+  console.log("all interets profile" + JSON.stringify(interestProfile));
+
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
@@ -173,7 +169,6 @@ const Profile = ({
 
       <View style={styles.bottomContainer}>
         <Input
-          // placeholder="You Wish To Be Called"
           inputStyle={{
             textAlign: "center",
             // letterSpacing: 0.5,
@@ -224,7 +219,7 @@ const Profile = ({
                 key={interest.key}
                 style={styles.iconContainer}
                 onPress={() => {
-                  !userInterests.includes(interest.id)
+                  userInterests && !userInterests.includes(interest.id)
                     ? pushInterestsHandler(interest.id)
                     : removeInterestHandler(interest.id);
                 }}
@@ -233,9 +228,10 @@ const Profile = ({
                   type={interest.type}
                   name={interest.name}
                   iconStyle={{
-                    color: userInterests.includes(interest.id)
-                      ? "orange"
-                      : "white"
+                    color:
+                      userInterests && userInterests.includes(interest.id)
+                        ? "orange"
+                        : "white"
                   }}
                   size={35}
                   underlayColor="blue"
@@ -246,7 +242,7 @@ const Profile = ({
         </View>
 
         <Button
-          title="NEXT"
+          title="SAVE"
           containerStyle={{ width: 100, marginTop: 20 }}
           buttonStyle={{
             backgroundColor: "orange",
@@ -328,11 +324,12 @@ const mapStateToProps = state => {
   return {
     checked: state.userProfile.genderChecked,
     userInterests: state.userProfile.userInterests,
-    useName: state.userProfile.username,
+    userName: state.userProfile.username,
     currentUserInterests: state.userProfile.currentUserInterests,
     currentUser: state.loginCredentials.currentUser,
-    allInterests: state.userProfile.allInterests,
-    currentUserAndInterests: state.userProfile.currentUserAndInterests
+    // allInterests: state.userProfile.allInterests,
+    currentUserAndInterests: state.userProfile.currentUserAndInterests,
+    interestProfile: state.userProfile.interestProfile
   };
 };
 
@@ -355,7 +352,10 @@ const mapDispatchToProps = dispatch => {
         type: "UPDATE_NEW_USER_INTERESTS",
         value: updatedUserInterests
       }),
-    dispatchFetchInterests: () => dispatch({ type: "ACTION_FETCH_INTERESTS" })
+    dispatchFetchInterests: () => dispatch({ type: "ACTION_FETCH_INTERESTS" }),
+    // testing
+    dispatchFetchUserProfile: id =>
+      dispatch({ type: "ACTION_FETCH_USER_PROFILE", value: id })
   };
 };
 

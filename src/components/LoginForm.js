@@ -58,7 +58,6 @@ const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
         activeOpacity={0.2}
         style={styles.submitButton}
         onPress={() => {
-          console.log("hello");
           dispatchLoginCredentials(user);
           // currentUser && NavigationService.navigate("MainNavigator");
         }}
@@ -81,7 +80,6 @@ const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
 };
 
 const mapStateToProps = ({ loginCredentials }) => {
-  console.log("whats in " + JSON.stringify(loginCredentials));
   return loginCredentials;
 };
 

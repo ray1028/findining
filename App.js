@@ -226,29 +226,59 @@ const userCurrentlocationStateReducer = (state, action) => {
 
 const userProfileStateReducer = (state, action) => {
   if (state === undefined)
-    return { userInterests: [], genderChecked: null, allInterests: [] };
+    return {
+      userInterests: [],
+      genderChecked: null,
+      // allInterests: [],
+      interestProfile: null
+    };
 
   switch (action.type) {
-    case "ACTION_FETCH_INTERESTS":
+    //
+    case "ACTION_FETCH_USER_PROFILE":
       (async () => {
-        const interestsResp = await request({
+        const userResp = await request({
           method: "get",
-          url: `${SERVER_URI}/interests`
+          url: `${SERVER_URI}/users/${action.value}`
         });
-        if (interestsResp.status !== 200) {
-          throw new Error("Error while fetching interests data");
+        if (userResp.status !== 200) {
+          throw new Error("Error while fetching user profile data");
         }
-        const interests = interestsResp.data;
-        if (interests.length > 0) {
-          store.dispatch({ type: "SET_ALL_INTERESTS", value: interests });
-        } else {
-          throw new Error("Error - Check database");
-        }
+
+        const userProfile = userResp.data;
+
+        console.log("inside reducer" + JSON.stringify(userProfile));
+        store.dispatch({
+          type: "SET_CURRENT_USER_PROFILE",
+          value: userProfile
+        });
       })();
       return state;
 
-    case "SET_ALL_INTERESTS":
-      return { ...state, allInterests: action.value };
+    case "SET_CURRENT_USER_PROFILE":
+      return { ...state, interestProfile: action.value };
+
+    //
+    // case "ACTION_FETCH_INTERESTS":
+    //   (async () => {
+    //     const interestsResp = await request({
+    //       method: "get",
+    //       url: `${SERVER_URI}/interests`
+    //     });
+    //     if (interestsResp.status !== 200) {
+    //       throw new Error("Error while fetching interests data");
+    //     }
+    //     const interests = interestsResp.data;
+    //     if (interests.length > 0) {
+    //       store.dispatch({ type: "SET_ALL_INTERESTS", value: interests });
+    //     } else {
+    //       throw new Error("Error - Check database");
+    //     }
+    //   })();
+    //   return state;
+
+    // case "SET_ALL_INTERESTS":
+    //   return { ...state, allInterests: action.value };
 
     case "SET_GENDER_CHECKED":
       return { ...state, genderChecked: action.check };
@@ -266,7 +296,6 @@ const userProfileStateReducer = (state, action) => {
           interest => interest !== action.interest
         )
       };
-
     // userInterests = {
     //   id: currentUser.id,
     //   name: userName,
@@ -274,7 +303,6 @@ const userProfileStateReducer = (state, action) => {
     //   interests: userInterests
     // };
     case "SET_NEW_USER_INTERESTS":
-      //new
       (async () => {
         const newUserInterestsResp = await request({
           method: "post",
@@ -282,8 +310,6 @@ const userProfileStateReducer = (state, action) => {
           data: {
             user_interests: {
               user_id: action.value.id,
-              username: action.value.name,
-              user_gender: action.value.gender,
               interests: action.value.interests
             }
           }
@@ -292,58 +318,31 @@ const userProfileStateReducer = (state, action) => {
           throw new Error("Error while posting user_interests");
         }
 
-        store.dispatch({
-          type: "SET_CURRENT_USER_INTERESTS",
-          value: newUserInterestsResp.data
-        });
-
-        console.log("finish posting user_inerests happy");
+        if (action.value.name || action.value.gender) {
+          (async () => {
+            const newUserProfileResp = await request({
+              method: "PATCH",
+              url: `${SERVER_URI}/users/${action.value.id}`,
+              data: {
+                user_profile: {
+                  id: action.value.id,
+                  username: action.value.name,
+                  user_gender: action.value.gender
+                }
+              }
+            });
+            if (newUserProfileResp.status !== 200) {
+              throw new Error("Error while posting data to user profile");
+            }
+            NavigationService.navigate("MainNavigator");
+          })();
+        }
       })();
       return state;
 
-    // probally dont have to do this cuz we have user interests above already
     case "SET_CURRENT_USER_INTERESTS":
       return { ...state, currentUserAndInterests: action.value };
 
-    // NEW CHANGES START HERE
-    // case "SET_NEW_USER_INTERESTS":
-    //   // retrieve current user interests
-    //   (async () => {
-    //     const currentUserInterestsResp = await request({
-    //       method: "get",
-    //       url: `${SERVER_URI}/users/${action.value}`
-    //     });
-
-    //     console.log("profile user object is " + action.value);
-
-    //     if (currentUserInterestsResp.status !== 200) {
-    //       throw new Error("error while fetching user interests");
-    //     } else {
-    //       const userInterests = currentUserInterestsResp.data;
-    //       store.dispatch({ type: "SET_USER_INTEREST", action: userInterests });
-    //     }
-    //   })();
-    // case "SET_USER_INTEREST":
-    //   return { ...state, currentUserInterests: action.value };
-    // OLDN CHANGES START HERE
-    // case "UPDATE_USER_INTERESTS":
-    //   Promise.all([
-    //     Promise.resolve(
-    //       request({
-    //         method: "PATCH",
-    //         url: `${SERVER_URI}/users/${action.value.id}`,
-    //         data: action.value
-    //       })
-    //     ),
-    //     // intrests
-    //     Promise.resolve(
-    //       request({
-    //         method: "PATCH",
-    //         url: `${SERVER_URI}/user_interests/${action.value.id}`,
-    //         data: action.value
-    //       })
-    //     )
-    //   ]);
     default:
       return state;
   }
@@ -467,7 +466,6 @@ const restaurantMenuReducer = (state, action) => {
         if (menuItemsResp.status !== 200) {
           throw new Error("Error occurs while fetching restaurant data");
         }
-        // duno why
         const menuItems = menuItemsResp.data;
         console.log("Menu FROM SERVER is " + JSON.stringify(menuItems));
         if (menuItems.length > 0) {
