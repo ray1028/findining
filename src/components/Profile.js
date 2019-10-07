@@ -116,7 +116,7 @@ const Profile = ({
 
     console.log(
       "coming from " +
-      Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
+        Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
     );
 
     // Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1] ===
@@ -125,9 +125,8 @@ const Profile = ({
     //   : dispatchUpdateUserInterests(currentUser.id);
 
     // dispatchNewUserInterests(userInterestsObj);
-
-  };  
-  // console.log("all interets profile" + JSON.stringify(interestProfile));  
+  };
+  // console.log("all interets profile" + JSON.stringify(interestProfile));
 
   return (
     <View style={styles.profileContainer}>
@@ -164,7 +163,6 @@ const Profile = ({
           value={username}
           onChangeText={name => usernameChangeHandler(name)}
           label={"Your Name"}
-
           color="white"
         />
         <View style={styles.radioBoxContainer}>
@@ -178,12 +176,12 @@ const Profile = ({
                     iconStyle={{ color: "white" }}
                   />
                 ) : (
-                    <Icon
-                      type="foundation"
-                      name="female-symbol"
-                      iconStyle={{ color: "white" }}
-                    />
-                  )}
+                  <Icon
+                    type="foundation"
+                    name="female-symbol"
+                    iconStyle={{ color: "white" }}
+                  />
+                )}
                 <TouchableOpacity
                   style={styles.radioBox}
                   onPress={() => changeGenderChecked(option.key)}
@@ -205,16 +203,16 @@ const Profile = ({
                 style={styles.iconContainer}
                 onPress={() => {
                   if (isSelected) {
-                    removeInterestHandler(interest.id)
+                    removeInterestHandler(interest.id);
                   } else {
-                    pushInterestsHandler(interest.id)
+                    pushInterestsHandler(interest.id);
                   }
                 }}
               >
                 <Icon
                   type={interest.type}
                   name={interest.name}
-                  iconStyle={{ color: (isSelected ? "orange" : "white") }}
+                  iconStyle={{ color: isSelected ? "orange" : "white" }}
                   size={35}
                   underlayColor="blue"
                 />
@@ -304,7 +302,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   return {
-    ...state.userProfile,
+    ...state.userProfile
     // checked: state.userProfile.genderChecked,
     // userInterests: state.userProfile.userInterests,
     // userName: state.userProfile.username,

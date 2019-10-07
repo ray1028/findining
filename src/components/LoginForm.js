@@ -23,6 +23,8 @@ const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
         source={require("../assets/images/findining.png")}
       />
       <Input
+        containerStyle={{ marginTop: 40, marginBottom: 10 }}
+        inputStyle={{ color: "white" }}
         placeholder="Email"
         autoCorrect={false}
         autoCapitalize="none"
@@ -39,6 +41,8 @@ const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
         onChangeText={text => (user.email = text)}
       />
       <Input
+        containerStyle={{ marginBottom: 10 }}
+        inputStyle={{ color: "white" }}
         placeholder="Password"
         autoCorrect={false}
         autoCapitalize="none"
@@ -119,8 +123,10 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: "#7a42f4",
+    width: "40%",
+    borderRadius: 50,
     padding: 10,
-    margin: 15,
+    margin: 20,
     height: 40,
     alignItems: "center"
   },
@@ -128,8 +134,8 @@ const styles = StyleSheet.create({
     color: "white"
   },
   logo: {
-    width: 120,
-    height: 100
+    width: 150,
+    height: 150
   },
   inputBox: {
     margin: 20,
