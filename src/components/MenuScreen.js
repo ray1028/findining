@@ -33,7 +33,7 @@ const images = {
   ]
 };
 
-const resturant = {
+const restaurant = {
   name: "Scotland Yard",
   // averageCostPerPerson: 33.25,
   // averageCostPerPint: 6.19,
@@ -59,50 +59,41 @@ const resturant = {
 
 const getTypeImage = type => images[type][0];
 
-const MenuScreen = ({
-  dispatchSetRestaurant,
-  currentRestaurant,
-  currentMenuItems,
-  dispatchSetMenuItem
-}) => {
-  useEffect(() => {
-    if (currentMenuItems.length < 1) {
-      // for testing , this should come from event
-      let restaurant_id = 1;
-      dispatchSetRestaurant(restaurant_id);
-      dispatchSetMenuItem(restaurant_id);
+const mapStateToProps = ({ eventDetail }) => eventDetail;
+const mapDispatchToProps = (dispatch) => ({});
+const MenuScreen = connect(mapStateToProps, mapDispatchToProps)
+  (({ restaurant }) => {
+    if (!restaurant) {
+      return (<View />); //@TODO Loading screen
     }
-  }, []);
-
-  return (
-    <View>
-      <View
-        style={{
-          borderBottomColor: "silver",
-          borderBottomWidth: 4,
-          padding: 10
-        }}
-      >
-        <Text style={{ fontSize: 34, fontWeight: "bold", textAlign: "center" }}>
-          {currentRestaurant.name}
-        </Text>
-        <Text
-          style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}
+    return (
+      <View>
+        <View
+          style={{
+            borderBottomColor: "silver",
+            borderBottomWidth: 4,
+            padding: 10
+          }}
         >
-          {resturant.openHour} - {resturant.closeHour}
-        </Text>
-      </View>
-      {/* not printing menu */}
-      {currentMenuItems && (
+          <Text style={{ fontSize: 34, fontWeight: "bold", textAlign: "center" }}>
+            {currentRestaurant.name}
+          </Text>
+          <Text
+            style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}
+          >
+            {resturant.openHour} - {resturant.closeHour}
+          </Text>
+        </View>
         <FlatList
           style={{ paddingTop: 10 }}
-          data={currentMenuItems}
+          data={restaurant.menuItems}
+          keyExtractor={(item, i) => i}
           renderItem={({ item }) => {
             return (
               <ListItem
                 leftAvatar={{
                   rounded: true,
-                  source: { uri: item.image_uri },
+                  source: { uri: item['image_uri'] },
                   size: "large"
                 }}
                 title={item.name}
@@ -112,22 +103,23 @@ const MenuScreen = ({
               />
             );
           }}
-          keyExtractor={item => item.id}
         />
-      )}
+        )}
     </View>
-  );
-};
+    );
+  });
 
-const mapStateToProps = ({ restaurantMenu }) => restaurantMenu;
+// const mapStateToProps = ({ restaurantMenu }) => restaurantMenu;
 
-const mapDispatchToProps = dispatch => ({
-  dispatchSetRestaurant: id =>
-    dispatch({ type: "ACTION_RESTAURANT", value: id }),
-  dispatchSetMenuItem: id => dispatch({ type: "ACTION_MENU_ITEMS", value: id })
-});
+// const mapDispatchToProps = dispatch => ({
+//   dispatchSetRestaurant: id =>
+//     dispatch({ type: "ACTION_RESTAURANT", value: id }),
+//   dispatchSetMenuItem: id => dispatch({ type: "ACTION_MENU_ITEMS", value: id })
+// });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MenuScreen);
+// export default connect(
+//   mapStateToProps,
+//   mapDispatchToProps
+// )(MenuScreen);
+
+export default MenuScreen;

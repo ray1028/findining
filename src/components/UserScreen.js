@@ -64,64 +64,6 @@ const userInterests = [
 ];
 const userGender = "male";
 
-const UserScreen = (
-  {
-    // userInterests, username, userGender
-  }
-) => {
-  return (
-    <View style={styles.profileContainer}>
-      <View style={styles.topContainer}>
-        <View>
-          <Avatar
-            rounded
-            source={require("../assets/images/ray.png")}
-            size={170}
-          />
-          <Badge
-            status="success"
-            containerStyle={{ position: "absolute", top: -4, right: -4 }}
-          />
-        </View>
-      </View>
-      <View style={styles.bottomContainer}>
-        <Text h1>{username}</Text>
-        <Text h1>{userGender}</Text>
-        <View style={styles.interestContainer}>
-          {userInterests.map(interest => {
-            return (
-              <View key={interest.key} style={styles.iconContainer}>
-                <Tooltip
-                  popover={<Text>{interest.key}</Text>}
-                  withOverlay={false}
-                >
-                  <Icon
-                    type={interest.type}
-                    name={interest.name}
-                    iconStyle={{
-                      color: "orange"
-                    }}
-                    size={35}
-                    underlayColor="blue"
-                  />
-                </Tooltip>
-              </View>
-            );
-          })}
-        </View>
-      </View>
-    </View>
-  );
-};
-
-const mapStateToProps = state => ({
-  // userInterests: state.userProfile.userInterests,
-  // username: state.userProfile.username,
-  // userGender: state.userProfile.genderChecked
-});
-
-const mapDispatchToProps = dispatch => ({});
-
 const styles = StyleSheet.create({
   profileContainer: {
     flex: 1
@@ -156,7 +98,54 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(UserScreen);
+const mapStateToProps = ({ eventDetail }) => eventDetail;
+const mapDispatchToProps = (dispatch) => ({});
+const UserScreen = connect(mapStateToProps, mapDispatchToProps)
+  (({ user }) => {
+    console.log(user);
+    return (
+      <View style={styles.profileContainer}>
+        <View style={styles.topContainer}>
+          <View>
+            <Avatar
+              rounded
+              source={require("../assets/images/ray.png")}
+              size={170}
+            />
+            <Badge
+              status="success"
+              containerStyle={{ position: "absolute", top: -4, right: -4 }}
+            />
+          </View>
+        </View>
+        <View style={styles.bottomContainer}>
+          <Text h1>{username}</Text>
+          <Text h1>{userGender}</Text>
+          <View style={styles.interestContainer}>
+            {userInterests.map(interest => {
+              return (
+                <View key={interest.key} style={styles.iconContainer}>
+                  <Tooltip
+                    popover={<Text>{interest.key}</Text>}
+                    withOverlay={false}
+                  >
+                    <Icon
+                      type={interest.type}
+                      name={interest.name}
+                      iconStyle={{
+                        color: "orange"
+                      }}
+                      size={35}
+                      underlayColor="blue"
+                    />
+                  </Tooltip>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </View>
+    );
+  });
+
+  export default UserScreen;

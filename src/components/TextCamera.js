@@ -49,104 +49,23 @@ import MapScreen from "./MapScreen";
 //   "YResolution": 72,
 // }
 
-const TextCamera = ({
-  hasCameraPermission,
-  camera,
-  bounds,
-  setCamera,
-  isFocused,
-  setCameraPermission,
-  dispatchUploadEvent,
-  dispatchResetCamera,
-  navigation
-}) => {
-  useEffect(() => {
-    // cleaning up camera
-    if (!isFocused) {
-      dispatchResetCamera();
-      return;
-    }
-    (async () => {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA);
-      console.log("set status", status);
-      setCameraPermission(status);
-    })();
-  }, [isFocused]);
-
-  if (!isFocused) {
-    return <View />;
-  }
-
-  console.log("permission check", hasCameraPermission);
-  if (hasCameraPermission === null) {
-    return <View />;
-  } else if (hasCameraPermission === false) {
-    return <Text>No access to camera</Text>;
-  } else {
-    return (
-      <View style={{ flex: 1 }}>
-        <Header
-          style={styles.headerBar}
-          centerComponent={{ text: "Findining" }}
-          backgroundColor="#3A445D"
-        >
-          {/* <MapScreen /> */}
-        </Header>
-        <View style={styles.topContainer}>
-          <Camera
-            style={{ flex: 1, position: "relative" }}
-            ref={setCamera}
-            type={Camera.Constants.Type.back}
-            onMountError={(...p) => console.log(p)}
-          >
-            {bounds.map((bound, index) => {
-              return (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => navigation.navigate("EventDetail")}
-                  style={{
-                    ...bound,
-                    position: "absolute",
-                    borderWidth: 2,
-                    borderColor: "orange",
-                    padding: 10
-                  }}
-                ></TouchableOpacity>
-              );
-            })}
-          </Camera>
-        </View>
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity
-            style={styles.captureButton}
-            onPress={async () => {
-              if (camera) {
-                const photo = await camera.takePictureAsync({
-                  exif: true,
-                  base64: true,
-                  skipProcessing: true
-                });
-                dispatchUploadEvent({
-                  image: photo.base64,
-                  meta: photo.exif
-                });
-              }
-            }}
-          ></TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-};
-
 const mapStateToProps = ({ cameraView }) => cameraView;
 const mapDispatchToProps = dispatch => ({
-  setCameraPermission: status =>
-    dispatch({ type: "SET_CAMERA_STATUS", value: status }),
-  setCamera: camera => dispatch({ type: "SET_CAMERA", value: camera }),
-  dispatchUploadEvent: image =>
-    dispatch({ type: "ACTION_IMAGE_AWS", value: image }),
-  dispatchResetCamera: () => dispatch({ type: "RESET_CAMERA" })
+  setCameraPermission: status => {
+    dispatch({ type: "SET_CAMERA_STATUS", value: status });
+  },
+  setCamera: camera => {
+    dispatch({ type: "SET_CAMERA", value: camera });
+  },
+  dispatchUploadEvent: (image) => {
+    dispatch({ type: "ACTION_IMAGE_AWS", value: image });
+  },
+  dispatchResetCamera: () => {
+    dispatch({ type: "RESET_CAMERA" });
+  },
+  setOpenRestaurantByName: (restaurantName) => {
+    dispatch({ type: "SET_OPEN_RESTAURANT_NAME", restaurantName });
+  }
 });
 
 const styles = StyleSheet.create({
@@ -182,7 +101,98 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TextCamera);
+const TextCamera = connect(mapStateToProps, mapDispatchToProps)
+  (({
+    hasCameraPermission,
+    camera,
+    bounds,
+    setCamera,
+    isFocused,
+    setCameraPermission,
+    dispatchUploadEvent,
+    dispatchResetCamera,
+    setOpenRestaurantByName,
+    navigation
+  }) => {
+    useEffect(() => {
+      // cleaning up camera
+      if (!isFocused) {
+        dispatchResetCamera();
+        return;
+      }
+    }, [isFocused]);
+
+    useEffect(() => {
+      (async () => {
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+        setCameraPermission(status);
+      })();
+    }, [])
+
+    if (!isFocused) {
+      return <View />;
+    }
+
+    if (hasCameraPermission === null) {
+      return <View />;
+    } else if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    } else {
+      return (
+        <View style={{ flex: 1 }}>
+          <Header
+            style={styles.headerBar}
+            centerComponent={{ text: "Findining" }}
+            backgroundColor="#3A445D"
+          >
+            {/* <MapScreen /> */}
+          </Header>
+          <View style={styles.topContainer}>
+            <Camera
+              style={{ flex: 1, position: "relative" }}
+              ref={setCamera}
+              type={Camera.Constants.Type.back}
+              onMountError={(...p) => console.log(p)}
+            >
+              {bounds.map((bound, index) => {
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      try {                        
+                        setOpenRestaurantByName(bound.text);
+                        navigation.navigate('EventDetail');
+                      } catch (err) {
+                        console.log(err);
+                      }
+                    }}
+                    style={{ ...bound, position: "absolute", borderWidth: 3 }}
+                  ></TouchableOpacity>
+                );
+              })}
+            </Camera>
+          </View>
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity
+              style={styles.captureButton}
+              onPress={async () => {
+                if (camera) {
+                  const photo = await camera.takePictureAsync({
+                    exif: true,
+                    base64: true,
+                    skipProcessing: true
+                  });
+                  dispatchUploadEvent({
+                    image: photo.base64,
+                    meta: photo.exif
+                  });
+                }
+              }}
+            ></TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+  });
+
+export default TextCamera;
