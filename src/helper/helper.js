@@ -19,4 +19,6 @@ const setSessionsToken = async token => {
   }
 };
 
-export { request, setSessionsToken };
+const isSessionValid = async () => !!(await AsyncStorage.getItem("session_token"));
+
+export { request, setSessionsToken, isSessionValid };

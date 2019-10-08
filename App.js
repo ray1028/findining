@@ -23,7 +23,7 @@ import EventDetailScreen from "./src/components/EventDetailScreen";
 import MatchRequest from "./src/components/MatchRequest";
 import StatusFooter from "./src/components/StatusFooter";
 import { SERVER_URI } from "./const";
-import { request, setSessionsToken } from "./src/helper/helper";
+import { request, setSessionsToken, isSessionValid } from "./src/helper/helper";
 
 import NavigationService from "./NavigationService";
 
@@ -133,12 +133,12 @@ const notificationSub = Notifications.addListener((notification) => {
 
 const fetchRestaurantDetail = async ({ restaurantId, restaurantName }) => {
   try {
-    const restaurantResp = await axios({
+    const restaurantResp = await request({
       method: 'GET',
       url: `${SERVER_URI}/restaurants/` + (restaurantId ? `${restaurantId}/` : `?name=${encodeURIComponent(restaurantName)}`)
     });
     if (restaurantResp.status !== 200) throw new Error(resp.data.error);
-    const menuResp = await axios({
+    const menuResp = await request({
       method: 'GET',
       url: `${SERVER_URI}/restaurants/${restaurantResp.data.id}/items`
     });
@@ -151,7 +151,7 @@ const fetchRestaurantDetail = async ({ restaurantId, restaurantName }) => {
 
 const fetchUserDetail = async (userId) => {
   try {
-    const resp = await axios({
+    const resp = await request({
       method: 'GET',
       url: `${SERVER_URI}/users/${userId}`
     });
@@ -163,7 +163,7 @@ const fetchUserDetail = async (userId) => {
 };
 
 const loginStateReducer = (state, action) => {
-  if (state === undefined) return { currentUser: "" };
+  if (state === undefined) return { currentUser: null };
   switch (action.type) {
     case "SET_LOGIN_CREDENTIALS":
       return { ...state, currentUser: action.value };
@@ -181,17 +181,13 @@ const loginStateReducer = (state, action) => {
             await setSessionsToken(resp.data.session_token);
             const userEmail = resp.data.user.email;
             const userId = resp.data.user.id;
-
-            if (userEmail) {
-              store.dispatch({
-                type: "SET_LOGIN_CREDENTIALS",
-                value: {
-                  id: userId,
-                  email: userEmail
-                }
-              });
-              NavigationService.navigate("MainNavigator");
-            }
+            if (!userEmail) throw new Error("Email missing from User Object");
+            store.dispatch({ type: "FETCH_EVENTS" });
+            store.dispatch({ type: "ACTION_FETCH_USER_PROFILE", value: userId });
+            store.dispatch({ type: "ACTION_FETCH_INTERESTS" });
+            store.dispatch({ type: "SET_LOGIN_CREDENTIALS", value: { id: userId, email: userEmail } });
+            store.dispatch({ type: "SET_USER_ID", uid: userId });
+            NavigationService.navigate("MainNavigator");
           }
 
           // else {
@@ -201,9 +197,10 @@ const loginStateReducer = (state, action) => {
           //   });
           // }
         } catch (error) {
-          console.log("Login Error");
+          console.log("Login Error ", error);
         }
       })();
+      return state;
 
     // set error by itself ?
     // case "SET_LOGIN_ERROR":
@@ -229,12 +226,16 @@ const signupStateReducer = (state, action) => {
             throw new Error("Error while signing up");
           }
           await setSessionsToken(resp.data.session_token);
-          return { ...state, currentUser: action.value };
+          store.dispatch({ type: "FETCH_EVENTS" });
+          store.dispatch({ type: "ACTION_FETCH_USER_PROFILE", value: resp.data.user.id });
+          store.dispatch({ type: "ACTION_FETCH_INTERESTS" });
+          store.dispatch({ type: "SET_USER_ID", uid: resp.data.user.id });
+          store.dispatch({ type: "SET_NEW_USER", value: action.value });
+          NavigationService.navigate("Profile");
         } catch (err) {
           console.log("Error while signing up + " + err);
         }
       })();
-      NavigationService.navigate("Profile");
       return state;
     case "SET_NEW_USER":
       return { ...state, currentUser: action.value };
@@ -261,11 +262,12 @@ const userProfileStateReducer = (state, action) => {
       userInterests: [],
       genderChecked: null,
       // allInterests: [],
-      interestProfile: null
+      username: null,
+      genderChecked: null,
+      id: null
     };
 
   switch (action.type) {
-    //
     case "ACTION_FETCH_USER_PROFILE":
       (async () => {
         const userResp = await request({
@@ -277,14 +279,20 @@ const userProfileStateReducer = (state, action) => {
         }
 
         const userProfile = userResp.data;
-
-        console.log("inside reducer" + JSON.stringify(userProfile));
         store.dispatch({
-          type: "SET_CURRENT_USER_PROFILE",
-          value: userProfile
+          type: "SET_INTEREST",
+          interests: userProfile.interests.map(interest => interest.id)
+        });
+        store.dispatch({
+          type: "SET_USERNAME",
+          name: userProfile.name
+        });
+        store.dispatch({
+          type: "SET_GENDER_CHECKED",
+          check: userProfile.gender
         });
       })();
-      return state;
+      return { ...state, id: action.value };
 
     case "SET_CURRENT_USER_PROFILE":
       return { ...state, interestProfile: action.value };
@@ -316,10 +324,9 @@ const userProfileStateReducer = (state, action) => {
     case "SET_USERNAME":
       return { ...state, username: action.name };
     case "SET_INTEREST":
-      return {
-        ...state,
-        userInterests: [...state.userInterests, action.interest]
-      };
+      return { ...state, userInterests: action.interests };
+    case "ADD_INTEREST":
+      return { ...state, userInterests: Array.from(new Set([...state.userInterests, action.interest])) };
     case "REMOVE_INTEREST":
       return {
         ...state,
@@ -333,46 +340,47 @@ const userProfileStateReducer = (state, action) => {
     //   gender: checked,
     //   interests: userInterests
     // };
-    case "SET_NEW_USER_INTERESTS":
+    case "SAVE_PROFILE":
       (async () => {
-        const newUserInterestsResp = await request({
-          method: "post",
-          url: `${SERVER_URI}/user_interests`,
-          data: {
-            user_interests: {
-              user_id: action.value.id,
-              interests: action.value.interests
-            }
-          }
-        });
-        if (newUserInterestsResp.status !== 200) {
-          throw new Error("Error while posting user_interests");
-        }
-
-        if (action.value.name || action.value.gender) {
-          (async () => {
-            const newUserProfileResp = await request({
-              method: "PATCH",
-              url: `${SERVER_URI}/users/${action.value.id}`,
-              data: {
-                user_profile: {
-                  id: action.value.id,
-                  username: action.value.name,
-                  user_gender: action.value.gender
-                }
+        try {
+          const newUserInterestsResp = await request({
+            method: "post",
+            url: `${SERVER_URI}/user_interests`,
+            data: {
+              user_interests: {
+                user_id: state.id,
+                interests: state.userInterests
               }
-            });
-            if (newUserProfileResp.status !== 200) {
-              throw new Error("Error while posting data to user profile");
             }
-            NavigationService.navigate("MainNavigator");
-          })();
+          });
+          if (newUserInterestsResp.status !== 200) {
+            throw new Error("Error while posting user_interests");
+          }
+
+          if (state.username || state.genderChecked) {
+            (async () => {
+              const newUserProfileResp = await request({
+                method: "PATCH",
+                url: `${SERVER_URI}/users/${state.id}`,
+                data: {
+                  user_profile: {
+                    id: state.id,
+                    username: state.username,
+                    user_gender: state.genderChecked
+                  }
+                }
+              });
+              if (newUserProfileResp.status !== 200) {
+                throw new Error("Error while posting data to user profile");
+              }
+              NavigationService.navigate("MainNavigator");
+            })();
+          }
+        } catch (err) {
+          console.log("Save Profile Error", err);
         }
       })();
       return state;
-
-    case "SET_CURRENT_USER_INTERESTS":
-      return { ...state, currentUserAndInterests: action.value };
 
     default:
       return state;
@@ -383,7 +391,7 @@ const cameraStateReducer = (state, action) => {
   if (state === undefined)
     return {
       hasCameraPermission: null,
-      bounds: []
+      bounds: [{ text: "KFC", top: '40%', left: '40%', width: '10%', height: '10%' }]
     };
   switch (action.type) {
     case "SET_CAMERA":
@@ -439,7 +447,7 @@ const eventDetailReducer = (state, action) => {
       return { ...state, selectedScreen: action.screen };
     case "CREATE_EVENT":
       (async () => {
-        const resp = await axios({
+        const resp = await request({
           method: 'post',
           url: `${SERVER_URI}/events`,
           data: { 'event': { 'restaurant': { 'id': state.restaurant.id } } }
@@ -492,7 +500,7 @@ const eventsReducer = (state, action) => {
   switch (action.type) {
     case "FETCH_EVENTS":
       (async () => {
-        const resp = await axios({
+        const resp = await request({
           method: 'GET',
           url: `${SERVER_URI}/events/`
         });
@@ -514,7 +522,7 @@ const eventsReducer = (state, action) => {
       return { ...state, openEventId: action.eventId };
     case "ACCEPT_MATCH_REQUEST":
       (async () => {
-        const resp = await axios({
+        const resp = await request({
           method: 'POST',
           url: `${SERVER_URI}/events/${openEventId}/accept`
         });
@@ -528,16 +536,20 @@ const eventsReducer = (state, action) => {
       return { ...state, visible: [...state.visible, action.event] };
     case "JOIN_EVENT":
       (async () => {
-        const resp = await axios({
-          method: 'POST',
-          url: `${SERVER_URI}/events/${openEventId}/join`
-        });
-        if (resp.status !== 200) throw new Error(resp.data.error);
+        try {
+          const resp = await request({
+            method: 'POST',
+            url: `${SERVER_URI}/events/${state.openEventId}/join`
+          });
+          if (resp.status !== 200) throw new Error(resp.data.error);
+        } catch (err) {
+          console.log("Error while joining event", err);
+        }
       })();
       return state;
     case "CANCEL_USER_STATUS":
       (async () => {
-        const resp = await axios({
+        const resp = await request({
           method: 'POST',
           url: `${SERVER_URI}/events/${openEventId}/cancel`
         });
@@ -702,7 +714,9 @@ const mapDispatchToProps = (dispatch) => ({
 const App = connect(mapStateToProps, mapDispatchToProps)
   (({ fetchEvents }) => {
     useEffect(() => {
-      fetchEvents();
+      (async () => {
+        if (await isSessionValid()) fetchEvents();
+      })();
     }, []);
     return (
       <View style={{ height: "100%", background: "black" }}>

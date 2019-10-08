@@ -76,12 +76,10 @@ const MenuScreen = connect(mapStateToProps, mapDispatchToProps)
           }}
         >
           <Text style={{ fontSize: 34, fontWeight: "bold", textAlign: "center" }}>
-            {currentRestaurant.name}
+            {restaurant.name}
           </Text>
-          <Text
-            style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}
-          >
-            {resturant.openHour} - {resturant.closeHour}
+          <Text style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}>
+            {restaurant.openHour} - {restaurant.closeHour}
           </Text>
         </View>
         <FlatList
@@ -104,8 +102,7 @@ const MenuScreen = connect(mapStateToProps, mapDispatchToProps)
             );
           }}
         />
-        )}
-    </View>
+      </View>
     );
   });
 

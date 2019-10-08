@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, ImageBackground } from "react-native";
+import { View, StyleSheet, ImageBackground, Text } from "react-native";
 import { Input, Icon, Avatar, withBadge, Button } from "react-native-elements";
 import { connect } from "react-redux";
 import { TouchableOpacity } from "react-native";
@@ -96,45 +96,27 @@ const BadgedIcon = withBadge(
 )(Avatar);
 
 const Profile = ({
-  checked,
+  genderChecked,
   changeGenderChecked,
   pushInterestsHandler,
   userInterests,
+  username,
   removeInterestHandler,
   usernameChangeHandler,
   navigation,
+  saveProfile,
   // current logged in user and user interestss
-  dispatchNewUserInterests,
-  dispatchUpdateUserInterests,
-  currentUserInterests,
-  currentUser,
-  userName,
-  dispatchFetchInterests,
   // allInterests,
-  currentUserAndInterests,
-  dispatchFetchUserProfile,
-  interestProfile
+  currentUserAndInterests
 }) => {
-  useEffect(() => {
-    dispatchFetchInterests();
-    dispatchFetchUserProfile(currentUser.id);
-  }, [currentUser]);
-
   const setUserProfile = () => {
     console.log(
       "current user and interests " + JSON.stringify(currentUserAndInterests)
     );
 
-    userInterestsObj = {
-      id: currentUser.id,
-      name: userName,
-      gender: checked,
-      interests: userInterests
-    };
-
     console.log(
       "coming from " +
-        Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
+      Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
     );
 
     // Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1] ===
@@ -142,10 +124,10 @@ const Profile = ({
     //   ? dispatchNewUserInterests(currentUser.id)
     //   : dispatchUpdateUserInterests(currentUser.id);
 
-    dispatchNewUserInterests(userInterestsObj);
-  };
+    // dispatchNewUserInterests(userInterestsObj);
 
-  console.log("all interets profile" + JSON.stringify(interestProfile));
+  };  
+  // console.log("all interets profile" + JSON.stringify(interestProfile));  
 
   return (
     <View style={styles.profileContainer}>
@@ -179,8 +161,10 @@ const Profile = ({
             width: "80%",
             borderColor: "orange"
           }}
+          value={username}
           onChangeText={name => usernameChangeHandler(name)}
           label={"Your Name"}
+
           color="white"
         />
         <View style={styles.radioBoxContainer}>
@@ -194,17 +178,17 @@ const Profile = ({
                     iconStyle={{ color: "white" }}
                   />
                 ) : (
-                  <Icon
-                    type="foundation"
-                    name="female-symbol"
-                    iconStyle={{ color: "white" }}
-                  />
-                )}
+                    <Icon
+                      type="foundation"
+                      name="female-symbol"
+                      iconStyle={{ color: "white" }}
+                    />
+                  )}
                 <TouchableOpacity
                   style={styles.radioBox}
                   onPress={() => changeGenderChecked(option.key)}
                 >
-                  {checked === option.key && (
+                  {genderChecked === option.key && (
                     <View style={styles.checkedCircle} />
                   )}
                 </TouchableOpacity>
@@ -214,25 +198,23 @@ const Profile = ({
         </View>
         <View style={styles.interestContainer}>
           {interests.map(interest => {
+            const isSelected = userInterests.includes(interest.id);
             return (
               <TouchableOpacity
-                key={interest.key}
+                key={interest.id}
                 style={styles.iconContainer}
                 onPress={() => {
-                  userInterests && !userInterests.includes(interest.id)
-                    ? pushInterestsHandler(interest.id)
-                    : removeInterestHandler(interest.id);
+                  if (isSelected) {
+                    removeInterestHandler(interest.id)
+                  } else {
+                    pushInterestsHandler(interest.id)
+                  }
                 }}
               >
                 <Icon
                   type={interest.type}
                   name={interest.name}
-                  iconStyle={{
-                    color:
-                      userInterests && userInterests.includes(interest.id)
-                        ? "orange"
-                        : "white"
-                  }}
+                  iconStyle={{ color: (isSelected ? "orange" : "white") }}
                   size={35}
                   underlayColor="blue"
                 />
@@ -249,7 +231,7 @@ const Profile = ({
             borderRadius: 40,
             fontSize: 20
           }}
-          onPress={() => setUserProfile()}
+          onPress={() => saveProfile()}
         />
       </View>
     </View>
@@ -322,14 +304,14 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   return {
-    checked: state.userProfile.genderChecked,
-    userInterests: state.userProfile.userInterests,
-    userName: state.userProfile.username,
-    currentUserInterests: state.userProfile.currentUserInterests,
-    currentUser: state.loginCredentials.currentUser,
+    ...state.userProfile,
+    // checked: state.userProfile.genderChecked,
+    // userInterests: state.userProfile.userInterests,
+    // userName: state.userProfile.username,
+    // currentUser: state.loginCredentials.currentUser,
     // allInterests: state.userProfile.allInterests,
-    currentUserAndInterests: state.userProfile.currentUserAndInterests,
-    interestProfile: state.userProfile.interestProfile
+    // currentUserAndInterests: state.userProfile.currentUserAndInterests,
+    // interestProfile: state.userProfile.interestProfile
   };
 };
 
@@ -338,8 +320,9 @@ const mapDispatchToProps = dispatch => {
     changeGenderChecked: check =>
       dispatch({ type: "SET_GENDER_CHECKED", check }),
     usernameChangeHandler: name => dispatch({ type: "SET_USERNAME", name }),
+    saveProfile: () => dispatch({ type: "SAVE_PROFILE" }),
     pushInterestsHandler: interest =>
-      dispatch({ type: "SET_INTEREST", interest }),
+      dispatch({ type: "ADD_INTEREST", interest }),
     removeInterestHandler: interest =>
       dispatch({ type: "REMOVE_INTEREST", interest }),
     dispatchGetUsersInterests: id =>
@@ -351,11 +334,7 @@ const mapDispatchToProps = dispatch => {
       dispatch({
         type: "UPDATE_NEW_USER_INTERESTS",
         value: updatedUserInterests
-      }),
-    dispatchFetchInterests: () => dispatch({ type: "ACTION_FETCH_INTERESTS" }),
-    // testing
-    dispatchFetchUserProfile: id =>
-      dispatch({ type: "ACTION_FETCH_USER_PROFILE", value: id })
+      })
   };
 };
 

@@ -8,13 +8,15 @@ function setTopLevelNavigator(navigatorRef) {
   _navigator = navigatorRef;
 }
 
-function navigate(routeName, params) {
-  _navigator.dispatch(
-    NavigationActions.navigate({
-      routeName,
-      params
-    })
-  );
+function navigate(routeName, params = {}) {
+  setTimeout(() => {
+    _navigator.dispatch(
+      NavigationActions.navigate({
+        routeName,
+        params
+      })
+    );
+  }, 400);
 }
 
 // add other navigation functions that you need and export them
