@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, AsyncStorage } from "react-native";
+import { StyleSheet, TouchableOpacity, Text } from "react-native";
 import FormWrap from "./FormWrap";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Input, Button, Image } from "react-native-elements";
@@ -15,10 +15,12 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
         source={require("../assets/images/findining.png")}
       />
       <Input
-        placeholder="Name"
+        placeholder=" Name"
         autoCorrect={false}
         autoCapitalize="none"
         underlineColorAndroid="transparent"
+        inputContainerStyle={{ textAlight: "right" }}
+        inputStyle={{ color: "white" }}
         leftIcon={
           <Icon
             name="user"
@@ -36,6 +38,7 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
         autoCorrect={false}
         autoCapitalize="none"
         underlineColorAndroid="transparent"
+        inputStyle={{ color: "white" }}
         leftIcon={
           <Icon
             name="envelope"
@@ -49,10 +52,11 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
         onChangeText={text => (user.email = text)}
       />
       <Input
-        placeholder="Password"
+        placeholder=" Password"
         autoCorrect={false}
         autoCapitalize="none"
         underlineColorAndroid="transparent"
+        inputStyle={{ color: "white" }}
         leftIcon={
           <Icon
             name="lock"
@@ -65,18 +69,17 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
         // onChangeText={props.changePasswordInput}
         onChangeText={text => (user.password = text)}
       />
-      <Button
-        title="Signup Now"
-        type="clear"
-        icon={<Icon name="plus" size={15} color="white" />}
-        style={styles.signupButton}
+
+      <TouchableOpacity
+        activeOpacity={0.2}
+        style={styles.submitButtonSignUp}
         onPress={() => {
           dispatchSignupCredentials(user);
-          console.log("current user is " + JSON.stringify(currentUser));
-          // currentUser && navigation.navigate("MainNavigator");
           currentUser && navigation.navigate("Profile");
         }}
-      />
+      >
+        <Text style={styles.submitText}>Sign up now</Text>
+      </TouchableOpacity>
     </FormWrap>
   );
 };
@@ -96,6 +99,18 @@ const styles = StyleSheet.create({
   },
   signupButton: {
     borderColor: "#7a42f4",
+    color: "white"
+  },
+  submitButtonSignUp: {
+    backgroundColor: "#7a42f4",
+    width: "40%",
+    borderRadius: 50,
+    padding: 10,
+    margin: 20,
+    height: 40,
+    alignItems: "center"
+  },
+  submitText: {
     color: "white"
   }
 });

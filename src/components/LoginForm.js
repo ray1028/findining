@@ -43,7 +43,7 @@ const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
       <Input
         containerStyle={{ marginBottom: 10 }}
         inputStyle={{ color: "white" }}
-        placeholder="Password"
+        placeholder=" Password"
         autoCorrect={false}
         autoCapitalize="none"
         underlineColorAndroid="transparent"
