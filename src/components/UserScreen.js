@@ -29,36 +29,65 @@ const BadgedIcon = withBadge(
   { top: 3, right: -10 }
 )(Avatar);
 
-const username = "Ray J";
 const userInterests = [
   {
+    id: 1,
     key: "finance",
     name: "finance",
     type: "material-community"
   },
   {
+    id: 2,
     key: "sports",
     name: "soccer-ball-o",
     type: "font-awesome"
   },
   {
+    id: 3,
     key: "date",
     name: "heart-o",
     type: "font-awesome"
   },
   {
+    id: 4,
     key: "tech",
     name: "code",
     type: "entypo"
   },
   {
+    id: 5,
     key: "art",
     name: "paint-brush",
     type: "font-awesome"
   },
   {
+    id: 6,
     key: "health",
     name: "food-variant",
+    type: "material-community"
+  },
+  {
+    id: 7,
+    key: "music",
+    name: "music",
+    type: "font-awesome"
+  },
+  {
+    id: 8,
+    key: "travel",
+    name: "plane",
+    type: "font-awesome"
+  },
+  {
+    id: 9,
+    key: "book",
+    name: "book",
+    type: "font-awesome"
+  },
+  {
+    id: 10,
+    key: "gym",
+    name: "dumbbell",
     type: "material-community"
   }
 ];
@@ -99,53 +128,64 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = ({ eventDetail }) => eventDetail;
-const mapDispatchToProps = (dispatch) => ({});
-const UserScreen = connect(mapStateToProps, mapDispatchToProps)
-  (({ user }) => {
-    console.log(user);
-    return (
-      <View style={styles.profileContainer}>
-        <View style={styles.topContainer}>
-          <View>
-            <Avatar
-              rounded
-              source={require("../assets/images/ray.png")}
-              size={170}
-            />
-            <Badge
-              status="success"
-              containerStyle={{ position: "absolute", top: -4, right: -4 }}
-            />
-          </View>
-        </View>
-        <View style={styles.bottomContainer}>
-          <Text h1>{username}</Text>
-          <Text h1>{userGender}</Text>
-          <View style={styles.interestContainer}>
-            {userInterests.map(interest => {
-              return (
-                <View key={interest.key} style={styles.iconContainer}>
-                  <Tooltip
-                    popover={<Text>{interest.key}</Text>}
-                    withOverlay={false}
-                  >
-                    <Icon
-                      type={interest.type}
-                      name={interest.name}
-                      iconStyle={{
-                        color: "orange"
-                      }}
-                      size={35}
-                      underlayColor="blue"
-                    />
-                  </Tooltip>
-                </View>
-              );
-            })}
-          </View>
+const mapDispatchToProps = dispatch => ({});
+const UserScreen = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(({ user }) => {
+  console.log("user who init the convo " + JSON.stringify(user));
+  return (
+    <View style={styles.profileContainer}>
+      <View style={styles.topContainer}>
+        <View>
+          <Avatar
+            rounded
+            source={require("../assets/images/ray.png")}
+            size={170}
+          />
+          <Badge
+            status="success"
+            containerStyle={{ position: "absolute", top: -4, right: -4 }}
+          />
         </View>
       </View>
-    );
-  });
+      <View style={styles.bottomContainer}>
+        <Text h1>{user.name}</Text>
+        <Text h1>{user.gender}</Text>
+        <View style={styles.interestContainer}>
+          {user.interests.map(interest => {
+            return (
+              <View key={interest.id} style={styles.iconContainer}>
+                <Tooltip
+                  popover={<Text>{interest.name}</Text>}
+                  withOverlay={false}
+                >
+                  <Icon
+                    type={userInterests.find(k => k.id === interest.id).type}
+                    name={userInterests.find(k => k.id === interest.id).name}
+                    iconStyle={{
+                      color: "orange"
+                    }}
+                    size={35}
+                    underlayColor="blue"
+                  />
+                </Tooltip>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </View>
+  );
+});
+export default UserScreen;
+// const mapStateToProps = state => {
+//   return {
+//     ...state.userProfile
+//   };
+// };
 
-  export default UserScreen;
+// export default connect(
+//   mapStateToProps,
+//   mapDispatchToProps
+// )(UserScreen);

@@ -109,25 +109,6 @@ const Profile = ({
   // allInterests,
   currentUserAndInterests
 }) => {
-  const setUserProfile = () => {
-    console.log(
-      "current user and interests " + JSON.stringify(currentUserAndInterests)
-    );
-
-    console.log(
-      "coming from " +
-        Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1]
-    );
-
-    // Object.keys(navigation.dangerouslyGetParent().router.childRouters)[1] ===
-    // "Signup"
-    //   ? dispatchNewUserInterests(currentUser.id)
-    //   : dispatchUpdateUserInterests(currentUser.id);
-
-    // dispatchNewUserInterests(userInterestsObj);
-  };
-  // console.log("all interets profile" + JSON.stringify(interestProfile));
-
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
@@ -152,7 +133,6 @@ const Profile = ({
         <Input
           inputStyle={{
             textAlign: "center",
-            // letterSpacing: 0.5,
             color: "white"
           }}
           containerStyle={{
