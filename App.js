@@ -1,34 +1,25 @@
-import React, { Component, useEffect } from "react";
-import { Text, TouchableOpacity, View, AsyncStorage } from "react-native";
-
-import SignInScreen from "./src/components/Login";
-import { createStore, combineReducers } from "redux";
-import { Provider, connect } from "react-redux";
-import SignUpScreen from "./src/components/Signup";
-import TextCamera from "./src/components/TextCamera";
-import MapScreen from "./src/components/MapScreen";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import ProfileScreen from "./src/components/Profile";
 import axios from "axios";
-import * as Permissions from "expo-permissions";
-import MenuScreen from "./src/components/MenuScreen";
-import UserScreen from "./src/components/UserScreen";
-import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
-import { createBottomTabNavigator } from "react-navigation-tabs";
-import {
-  createAppContainer,
-  withNavigationFocus,
-  NavigationActions
-} from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
 import { Notifications } from "expo";
-import EventDetailScreen from "./src/components/EventDetailScreen";
-import MatchRequest from "./src/components/MatchRequest";
-import StatusFooter from "./src/components/StatusFooter";
+import * as Permissions from "expo-permissions";
+import React, { useEffect } from "react";
+import { AsyncStorage, View } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { createAppContainer, withNavigationFocus } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
+import { createBottomTabNavigator } from "react-navigation-tabs";
+import { connect, Provider } from "react-redux";
+import { combineReducers, createStore } from "redux";
 import { SERVER_URI } from "./const";
-import { request, setSessionsToken, isSessionValid } from "./src/helper/helper";
-
 import NavigationService from "./NavigationService";
+import EventDetailScreen from "./src/components/EventDetailScreen";
+import SignInScreen from "./src/components/Login";
+import MapScreen from "./src/components/MapScreen";
+import MatchRequest from "./src/components/MatchRequest";
+import ProfileScreen from "./src/components/Profile";
+import SignUpScreen from "./src/components/Signup";
+import StatusFooter from "./src/components/StatusFooter";
+import TextCamera from "./src/components/TextCamera";
+import { isSessionValid, request, setSessionsToken } from "./src/helper/helper";
 
 // import { fromLeft, fromRight } from "react-navigation-transitions";
 
@@ -323,7 +314,7 @@ const userProfileStateReducer = (state, action) => {
         });
         store.dispatch({
           type: "SET_USER_IMAGE_URI",
-          check: userProfile.profile_uri
+          value: userProfile.profile_uri
         });
       })();
       return { ...state, id: action.value };
@@ -428,10 +419,12 @@ const cameraStateReducer = (state, action) => {
     return {
       hasCameraPermission: null,
       bounds: [
-        { text: "KFC", top: "40%", left: "40%", width: "10%", height: "10%" }
+        // { text: "KFC", top: "40%", left: "40%", width: "10%", height: "10%" }
       ]
     };
   switch (action.type) {
+    case "SET_SPINNER":
+      return { ...state, spinner: action.value };
     case "SET_CAMERA":
       return { ...state, camera: action.value };
     case "SET_CAMERA_STATUS":
@@ -440,7 +433,7 @@ const cameraStateReducer = (state, action) => {
       return { ...state, bounds: action.value };
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
-      (async () => {
+      store.dispatch({ type: "SET_SPINNER", value: true })(async () => {
         const resp = await request({
           method: "post",
           url: `${SERVER_URI}/images`,
@@ -760,7 +753,8 @@ const withProvider = AppComponent => {
 const mapStateToProps = ({ events }) => ({ ...events });
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" })
+  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" }),
+  dispatchSetSpinner: status => dispatch({ type: "SET_SPINNER", status })
 });
 
 const App = connect(

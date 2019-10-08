@@ -1,8 +1,14 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, ImageBackground, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  Text,
+  TouchableWithoutFeedback,
+  TouchableOpacity
+} from "react-native";
 import { Input, Icon, Avatar, withBadge, Button } from "react-native-elements";
 import { connect } from "react-redux";
-import { TouchableOpacity } from "react-native";
 
 //
 import * as ImagePicker from "expo-image-picker";
@@ -139,7 +145,7 @@ const Profile = ({
       dispatchUpdateUserImage(result.uri);
     }
   };
-
+  console.log("current image is " + userImage);
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
@@ -152,7 +158,7 @@ const Profile = ({
             alignItems: "center"
           }}
         >
-          <TouchableOpacity onPress={() => _pickImage()}>
+          <TouchableWithoutFeedback onPress={() => _pickImage()}>
             <BadgedIcon
               // source={require("../assets/images/ray.png")}
               // source={userImage}
@@ -160,7 +166,7 @@ const Profile = ({
               rounded
               size={170}
             />
-          </TouchableOpacity>
+          </TouchableWithoutFeedback>
         </ImageBackground>
       </View>
 
@@ -241,8 +247,7 @@ const Profile = ({
           containerStyle={{ width: 100, marginTop: 20 }}
           buttonStyle={{
             backgroundColor: "orange",
-            borderRadius: 40,
-            fontSize: 20
+            borderRadius: 40
           }}
           onPress={() => saveProfile()}
         />
