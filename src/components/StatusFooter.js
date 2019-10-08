@@ -3,18 +3,18 @@ import { Text, View, TouchableOpacity } from "react-native";
 import { Icon } from "react-native-elements";
 import { connect } from "react-redux";
 
-const mapStateToProps = ({ user }) => user;
+const mapStateToProps = ({ events }) => events;
 const mapDispatchToProps = (dispatch) => ({
-  setUserStatus: (status) => dispatch({ type: "SET_USER_STATUS", status })
+  cancelUserStatus: (status) => dispatch({ type: "CANCEL_USER_STATUS", status })
 });
 
 const StatusFooter = connect(mapStateToProps, mapDispatchToProps)(
-  ({ status, setUserStatus }) => {
-    if (status) {
+  ({ status, message, cancelUserStatus }) => {
+    if (message) {
       return (
         <View style={{ width: '100%', height: 40, backgroundColor: 'yellow', position: 'absolute', bottom: 49, left: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: 18 }}>WAITING</Text>
-          <TouchableOpacity onPress={() => setUserStatus(null)}>
+          <Text style={{ fontSize: 18 }}>{message}</Text>
+          <TouchableOpacity onPress={() => cancelUserStatus()}>
             <Icon
               name="times-circle"
               type="font-awesome"

@@ -152,7 +152,7 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
               style={{ flex: 1, position: "relative" }}
               ref={setCamera}
               type={Camera.Constants.Type.back}
-              onMountError={(...p) => console.log(p)}
+              onMountError={(...p) => console.log("Camera Mount Error", p)}
             >
               {bounds.map((bound, index) => {
                 return (
@@ -163,7 +163,7 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
                         setOpenRestaurantByName(bound.text);
                         navigation.navigate('EventDetail');
                       } catch (err) {
-                        console.log(err);
+                        console.log("Open Restaurant error", err);
                       }
                     }}
                     style={{ ...bound, position: "absolute", borderWidth: 3 }}

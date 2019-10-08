@@ -1,5 +1,5 @@
 import React, { Component, useEffect } from "react";
-import { Text, TouchableOpacity, View, AsyncStorage } from "react-native";
+import { Text, TouchableOpacity, View, AsyncStorage, Alert } from "react-native";
 
 import { connect } from "react-redux";
 import SignInScreen from "./src/components/Login";
@@ -12,8 +12,6 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import ProfileScreen from "./src/components/Profile";
 import axios from "axios";
 import * as Permissions from "expo-permissions";
-import MenuScreen from "./src/components/MenuScreen";
-import UserScreen from "./src/components/UserScreen";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createAppContainer, withNavigationFocus, NavigationActions } from "react-navigation";
@@ -22,78 +20,11 @@ import { Notifications } from "expo";
 import EventDetailScreen from "./src/components/EventDetailScreen";
 import MatchRequest from "./src/components/MatchRequest";
 import StatusFooter from "./src/components/StatusFooter";
+import DiningScreen from "./src/components/DiningScreen";
 import { SERVER_URI } from "./const";
 import { request, setSessionsToken, isSessionValid } from "./src/helper/helper";
 
 import NavigationService from "./NavigationService";
-
-// bottom tab routes here may wanna moduliza later
-// const MainNavigator = createBottomTabNavigator(
-//   {
-//     Map: {
-//       screen: MapScreen
-//     },
-//     Camera: {
-//       screen: withNavigationFocus(TextCamera)
-//     },
-//     Setting: {
-//       screen: Profile
-//     }
-//   },
-//   {
-//     defaultNavigationOptions: ({ navigation }) => ({
-//       tabBarIcon: ({ focused, horizontal, tintColor }) => {
-//         const { routeName } = navigation.state;
-//         let IconComponent = Icon;
-//         let iconName = "";
-
-//         switch (routeName) {
-//           case "Map":
-//             iconName = "map";
-//             break;
-//           case "Camera":
-//             iconName = "linked-camera";
-//             break;
-//           case "Setting":
-//             iconName = "person-outline";
-//             break;
-//           default:
-//             return;
-//         }
-//         return <IconComponent name={iconName} size={25} color={tintColor} />;
-//       }
-//     }),
-//     tabBarOptions: {
-//       activeTintColor: "tomato",
-//       inactiveTintColor: "lightgrey"
-//     },
-//     initialRouteName: "Map",
-//     order: ["Map", "Camera", "Setting"]
-//   }
-// );
-
-// routing here for now maybe modulize later
-
-// const AuthStack = createStackNavigator(
-//   {
-//     SignIn: { screen: Login },
-//     Signup: { screen: Signup },
-//     Profile: { screen: Profile },
-//     EventDetail: { screen: EventDetailScreen },
-//     UserScreen: { screen: UserScreen },
-//     MainNavigator: {
-//       screen: MainNavigator,
-//       navigationOptions: {
-//         header: null
-//       }
-//     }
-//   },
-//   {
-//     initialRouteName: "SignIn",
-//     defaultNavigationOptions: { header: null, headerVisible: false }
-//   }
-// );
-
 
 const askPermissionAsync = async permissionType => {
   const { status: existingStatus } = await Permissions.getAsync(permissionType);
@@ -104,7 +35,7 @@ const askPermissionAsync = async permissionType => {
   }
 };
 
-const sendPushToken = async ({ id: userId }) => {
+const sendPushToken = async ({ uid }) => {
   await askPermissionAsync(Permissions.NOTIFICATIONS);
   const prevExpoPushToken = await AsyncStorage.getItem("ExpoPushToken");
   const expoPushToken =
@@ -114,8 +45,8 @@ const sendPushToken = async ({ id: userId }) => {
   }
   const resp = await request({
     method: "post",
-    url: `${SERVER_URI}/users/${userId}/token`,
-    data: { user_id: userId, expo_push_token: expoPushToken }
+    url: `${SERVER_URI}/users/${uid}/token`,
+    data: { user_id: uid, expo_push_token: expoPushToken }
   });
 
   if (resp.status !== 200) throw new Error("Failed to send token to server");
@@ -124,6 +55,10 @@ const sendPushToken = async ({ id: userId }) => {
 const notificationSub = Notifications.addListener((notification) => {
   try {
     if (notification.origin === "received") {
+      if (["CREATE_EVENT", "DELETE_EVENT"].includes(notification.data.type)) {
+        Notifications.dismissNotificationAsync(notification.notificationId);
+      }
+      console.log("NOTIFICATION DISPATCH", notification.data);
       store.dispatch({ ...notification.data, type: `REMOTE_${notification.data.type}` });
     }
   } catch (err) {
@@ -145,7 +80,7 @@ const fetchRestaurantDetail = async ({ restaurantId, restaurantName }) => {
     if (menuResp.status !== 200) throw new Error(resp.data.error);
     store.dispatch({ type: "SET_EVENT_DETAIL_DATA_MENU", restaurant: { ...restaurantResp.data, menuItems: menuResp.data } });
   } catch (err) {
-    console.log(err);
+    console.log("Fetch Restaurant Detail error", err);
   }
 };
 
@@ -158,7 +93,7 @@ const fetchUserDetail = async (userId) => {
     if (resp.status !== 200) throw new Error(resp.data.error);
     store.dispatch({ type: "SET_EVENT_DETAIL_DATA_USER", user: resp.data });
   } catch (err) {
-    console.log(err);
+    console.log("Fetch User Detail error", err);
   }
 };
 
@@ -187,7 +122,7 @@ const loginStateReducer = (state, action) => {
             store.dispatch({ type: "ACTION_FETCH_INTERESTS" });
             store.dispatch({ type: "SET_LOGIN_CREDENTIALS", value: { id: userId, email: userEmail } });
             store.dispatch({ type: "SET_USER_ID", uid: userId });
-            NavigationService.navigate("MainNavigator");
+            NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'MapScreen' }));
           }
 
           // else {
@@ -264,7 +199,7 @@ const userProfileStateReducer = (state, action) => {
       // allInterests: [],
       username: null,
       genderChecked: null,
-      id: null
+      uid: null
     };
 
   switch (action.type) {
@@ -348,7 +283,7 @@ const userProfileStateReducer = (state, action) => {
             url: `${SERVER_URI}/user_interests`,
             data: {
               user_interests: {
-                user_id: state.id,
+                user_id: state.uid,
                 interests: state.userInterests
               }
             }
@@ -361,10 +296,10 @@ const userProfileStateReducer = (state, action) => {
             (async () => {
               const newUserProfileResp = await request({
                 method: "PATCH",
-                url: `${SERVER_URI}/users/${state.id}`,
+                url: `${SERVER_URI}/users/${state.uid}`,
                 data: {
                   user_profile: {
-                    id: state.id,
+                    id: state.uid,
                     username: state.username,
                     user_gender: state.genderChecked
                   }
@@ -373,8 +308,8 @@ const userProfileStateReducer = (state, action) => {
               if (newUserProfileResp.status !== 200) {
                 throw new Error("Error while posting data to user profile");
               }
-              NavigationService.navigate("MainNavigator");
             })();
+            NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'MapScreen' }));
           }
         } catch (err) {
           console.log("Save Profile Error", err);
@@ -435,7 +370,7 @@ const cameraStateReducer = (state, action) => {
 };
 
 const eventDetailReducer = (state, action) => {
-  const defaultState = { selectedScreen: 'User', user: null, restaurant: null };
+  const defaultState = { selectedScreen: 'User', user: null, restaurant: null, rating: null };
   if (state === undefined) return defaultState;
 
   switch (action.type) {
@@ -445,6 +380,11 @@ const eventDetailReducer = (state, action) => {
       return { ...state, user: action.user };
     case "SET_EVENT_DETAIL_SCREEN":
       return { ...state, selectedScreen: action.screen };
+    case "FINISH_DINING":
+      NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'MapScreen' }));
+      return state;
+    case "SEND_RATING":
+      return { ...state, rating: action.rating };
     case "CREATE_EVENT":
       (async () => {
         const resp = await request({
@@ -455,49 +395,65 @@ const eventDetailReducer = (state, action) => {
         if (resp.status !== 200) throw new Error(resp.data.error);
         store.dispatch({ type: "SET_HOSTED_EVENT_ID", eventId: resp.data.id });
       })();
-      return state;
+      return { ...state, user: null, rating: null };
     case "CLOSE_EVENT_DETAIL_SCREEN":
       return { ...state, ...defaultState };
     case "REMOTE_JOIN_EVENT":
+      fetchUserDetail(action.event.guest.id);
+      fetchRestaurantDetail({ restaurantId: action.event.restaurant.id });
       NavigationService.navigate('MatchRequest');
-      return { ...state, user: action.guest };
-    default:
       return state;
-  }
-};
-
-const userStateReducer = (state, action) => {
-  if (state === undefined) return { status: null, id: null };
-
-  switch (action.type) {
-    case "SET_USER_ID":
-      sendPushToken({ id: action.uid });
-      return { ...state, id: action.uid };
-    case "SET_USER_STATUS":
-      return { ...state, status: action.status };
-    case "CANCEL_USER_STATUS":
-      return { ...state, status: null };
-    case "REMOTE_CANCEL_JOIN_EVENT":
-      NavigationService.navigate('MainNavigator');
-      return { ...state, status: "Waiting for Guest Dinner..." };
-    case "REMOTE_CANCEL_EVENT":
-      if (status !== null) {
-        Alert.alert("Event has been cancelled");
-        NavigationService.navigate('MainNavigator');
-      }
-      return { ...state, status: null };
-    case "CREATE_EVENT":
-      return { ...state, status: "Waiting for Guest Dinner..." };
-    case "JOIN_EVENT":
-      return { ...state, status: 'Your Dinning Request has been sent!' };
     default:
       return state;
   }
 };
 
 const eventsReducer = (state, action) => {
-  if (state === undefined) return { visible: [], openEventId: null };
+  if (state === undefined) return { visible: [], openEventId: null, status: null, message: null, uid: null };
   switch (action.type) {
+    case "SET_EVENTS":
+      for (let event of action.events) {
+        if (state.uid === event.host.id) return { ...state, status: 'WAITING_FOR_GUEST', message: 'Waiting for Guest Diner...' };
+      }
+      return state;
+    case "SET_USER_ID":
+      sendPushToken({ uid: action.uid });
+      return { ...state, uid: action.uid };
+    case "CANCEL_USER_STATUS":
+      if (state.status === "WAITING_FOR_GUEST" || state.status === "WAITING_FOR_HOST_REPLY") {
+        (async () => {
+          const resp = await request({
+            method: 'POST',
+            url: `${SERVER_URI}/events/${state.openEventId}/cancel`
+          });
+          if (resp.status !== 200) throw new Error(resp.data.error);
+        })();
+      }
+      return { ...state, openEventId: null, status: null, message: null, visible: visible.filter(event => event.host.id !== uid) };
+    case "REMOTE_CANCEL_JOIN_EVENT":
+      NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'MapScreen' }));
+      return { ...state, status: "WAITING_FOR_GUEST", message: "Waiting for Guest Dinner..." };
+    case "REMOTE_CANCEL_EVENT":
+      if (openEventId === action.event.id) {
+        Alert.alert("Event has been cancelled");
+        NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'MapScreen' }));
+        return { ...state, visible: state.visible.filter(event => event.id !== action.event.id), openEventId: null };
+      }
+      return { ...state, visible: state.visible.filter(event => event.id !== action.event.id) };
+    case "REMOTE_JOIN_RESPONSE":
+      if (action.accept) {
+        Alert.alert("Your dining request has been accepted!");
+        NavigationService.navigate('Dining');
+        fetchRestaurantDetail({ restaurantId: action.event.restaurant.id });
+        return { ...state, status: "DINING", message: null };
+      } else {
+        Alert.alert("Your dining request has been rejected :(");
+        return { ...state, openEventId: null, status: null, message: null };
+      }
+    case "CREATE_EVENT":
+      return { ...state, status: "WAITING_FOR_GUEST", message: "Waiting for Guest Dinner..." };
+    case "JOIN_EVENT":
+      return { ...state, status: "WAITING_FOR_HOST_REPLY", message: 'Your Dinning Request has been sent!' };
     case "FETCH_EVENTS":
       (async () => {
         const resp = await request({
@@ -510,10 +466,10 @@ const eventsReducer = (state, action) => {
       return state;
     case "REMOTE_CREATE_EVENT":
       return { ...state, visible: [...state.visible, action.event] };
+    case "REMOTE_JOIN_EVENT":
+      return { ...state, openEventId: action.event.id, message: null };
     case "SET_EVENTS":
       return { ...state, visible: action.events };
-    case "REMOTE_CANCEL_EVENT":
-      return { ...state, visible: state.visible.filter(event => event.id !== action.event.id), openEventId: openEventId === action.event.id ? null : openEventId };
     case "SET_OPEN_EVENT":
       fetchUserDetail(action.event.host.id);
       fetchRestaurantDetail({ restaurantId: action.event.restaurant.id });
@@ -522,13 +478,32 @@ const eventsReducer = (state, action) => {
       return { ...state, openEventId: action.eventId };
     case "ACCEPT_MATCH_REQUEST":
       (async () => {
-        const resp = await request({
-          method: 'POST',
-          url: `${SERVER_URI}/events/${openEventId}/accept`
-        });
-        if (resp.status !== 200) throw new Error(resp.data.error);
+        try {
+          const resp = await request({
+            method: 'POST',
+            url: `${SERVER_URI}/events/${state.openEventId}/accept`
+          });
+          if (resp.status !== 200) throw new Error(resp.data.error);
+          NavigationService.navigate('Dining');
+        } catch (err) {
+          console.log("event/accept error", err)
+        }
       })();
       return state;
+    case "REJECT_MATCH_REQUEST":
+      (async () => {
+        try {
+          const resp = await request({
+            method: 'POST',
+            url: `${SERVER_URI}/events/${state.openEventId}/reject`
+          });
+          if (resp.status !== 200) throw new Error(resp.data.error);
+          NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: 'MapScreen' }));
+        } catch (err) {
+          console.log("event/reject error", err)
+        }
+      })();
+      return { ...state, status: "WAITING_FOR_GUEST", message: "Waiting for Guest Dinner..." };
     case "SET_OPEN_RESTAURANT_NAME":
       fetchRestaurantDetail({ restaurantName: action.restaurantName });
       return state;
@@ -547,15 +522,6 @@ const eventsReducer = (state, action) => {
         }
       })();
       return state;
-    case "CANCEL_USER_STATUS":
-      (async () => {
-        const resp = await request({
-          method: 'POST',
-          url: `${SERVER_URI}/events/${openEventId}/cancel`
-        });
-        if (resp.status !== 200) throw new Error(resp.data.error);
-      })();
-      return { ...state, openEventId: null };
     case "CLOSE_EVENT_DETAIL_SCREEN":
       return { ...state, openEventId: null };
     default:
@@ -626,7 +592,6 @@ const reducer = combineReducers({
   userProfile: userProfileStateReducer,
   eventDetail: eventDetailReducer,
   events: eventsReducer,
-  user: userStateReducer,
   findUserCurrentLocation: userCurrentlocationStateReducer,
   restaurantMenu: restaurantMenuReducer
   // userInterests: userInterestsReducer
@@ -680,6 +645,7 @@ const AuthStack = createStackNavigator(
     Profile: { screen: ProfileScreen },
     EventDetail: { screen: EventDetailScreen },
     MatchRequest: { screen: MatchRequest },
+    Dining: { screen: DiningScreen },
     MainNavigator: {
       screen: MainNavigator,
       navigationOptions: {

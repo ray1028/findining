@@ -60,13 +60,11 @@ const MapScreen = connect(mapStateToProps, mapDispatchToProps)
     useEffect(() => {
       (async () => {
         if (Platform.OS === "android" && !Constants.isDevice) {
-          console.log(_getLocationAsync());
-          console.log("is thi s a device ? " + Constants.isDevice);
+          // console.log(_getLocationAsync());
+          // console.log("is thi s a device ? " + Constants.isDevice);
         } else {
           location = await _getLocationAsync();
-          console.log(
-            "currrent location for your device is " + JSON.stringify(location)
-          );
+          // console.log("currrent location for your device is " + JSON.stringify(location));
         }
       })();
     }, []);
@@ -74,7 +72,7 @@ const MapScreen = connect(mapStateToProps, mapDispatchToProps)
     // watcher for users current locations changes
 
     Location.watchPositionAsync({ timeInterval: 3000 }, () => {
-      console.log("the location is now changed");
+      // console.log("the location is now changed");
     });
 
     return (

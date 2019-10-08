@@ -15,7 +15,7 @@ const setSessionsToken = async token => {
   try {
     await AsyncStorage.setItem("session_token", token);
   } catch (error) {
-    console.log("Error while setting token");
+    console.log("Error while setting token", error);
   }
 };
 

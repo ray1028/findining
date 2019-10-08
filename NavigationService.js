@@ -8,14 +8,19 @@ function setTopLevelNavigator(navigatorRef) {
   _navigator = navigatorRef;
 }
 
-function navigate(routeName, params = {}) {
+function navigate(routeName, params, action) {
   setTimeout(() => {
-    _navigator.dispatch(
-      NavigationActions.navigate({
-        routeName,
-        params
-      })
-    );
+    _navigator.dispatch(NavigationActions.navigate({
+      routeName,
+      params,
+      action
+    }));
+  }, 400);
+}
+
+function goBack(...params) {
+  setTimeout(() => {
+    _navigator.goBack(...params);
   }, 400);
 }
 
@@ -23,5 +28,6 @@ function navigate(routeName, params = {}) {
 
 export default {
   navigate,
-  setTopLevelNavigator
+  setTopLevelNavigator,
+  goBack
 };

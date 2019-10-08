@@ -72,7 +72,7 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
         style={styles.signupButton}
         onPress={() => {
           dispatchSignupCredentials(user);
-          console.log("current user is " + JSON.stringify(currentUser));
+          // console.log("current user is " + JSON.stringify(currentUser));
           // currentUser && navigation.navigate("MainNavigator");
           currentUser && navigation.navigate("Profile");
         }}

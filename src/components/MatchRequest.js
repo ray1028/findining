@@ -9,7 +9,8 @@ const OverlayUserScreen = withAcceptReject(UserScreen);
 
 const mapStateToProps = () => ({});
 const mapDispatchToProps = (dispatch) => ({
-  acceptMatchRequest: () => dispatch({ type: 'ACCEPT_MATCH_REQUEST' })
+  acceptMatchRequest: () => dispatch({ type: 'ACCEPT_MATCH_REQUEST' }),
+  rejectMatchRequest: () => dispatch({ type: 'REJECT_MATCH_REQUEST' })
 });
 const MatchRequest = connect(mapStateToProps, mapDispatchToProps)
   (({ navigation, acceptMatchRequest }) => {
@@ -18,10 +19,9 @@ const MatchRequest = connect(mapStateToProps, mapDispatchToProps)
         <OverlayUserScreen
           onAccept={() => {
             acceptMatchRequest();
-            navigation.navigate('MainNavigator');
           }}
           onReject={() => {
-            navigation.navigate('MainNavigator');
+            rejectMatchRequest();
           }}
         />        
       </View>
