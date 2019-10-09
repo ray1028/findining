@@ -1,6 +1,4 @@
-import React, { Component, useEffect } from "react";
 import { Text, TouchableOpacity, View, AsyncStorage, Alert } from "react-native";
-
 import { connect } from "react-redux";
 import SignInScreen from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
@@ -11,20 +9,100 @@ import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ProfileScreen from "./src/components/Profile";
 import axios from "axios";
+import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createAppContainer, withNavigationFocus, NavigationActions } from "react-navigation";
+import React, { useEffect } from "react";
+import { AsyncStorage, View } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { createStackNavigator } from "react-navigation-stack";
-import { Notifications } from "expo";
+import { createBottomTabNavigator } from "react-navigation-tabs";
+import { connect, Provider } from "react-redux";
+import { combineReducers, createStore } from "redux";
+import { SERVER_URI } from "./const";
+import NavigationService from "./NavigationService";
 import EventDetailScreen from "./src/components/EventDetailScreen";
+import SignInScreen from "./src/components/Login";
+import MapScreen from "./src/components/MapScreen";
 import MatchRequest from "./src/components/MatchRequest";
+import ProfileScreen from "./src/components/Profile";
+import SignUpScreen from "./src/components/Signup";
 import StatusFooter from "./src/components/StatusFooter";
 import DiningScreen from "./src/components/DiningScreen";
 import { SERVER_URI } from "./const";
-import { request, setSessionsToken, isSessionValid } from "./src/helper/helper";
+import TextCamera from "./src/components/TextCamera";
+import { isSessionValid, request, setSessionsToken } from "./src/helper/helper";
 
-import NavigationService from "./NavigationService";
+// import { fromLeft, fromRight } from "react-navigation-transitions";
+
+// bottom tab routes here may wanna moduliza later
+// const MainNavigator = createBottomTabNavigator(
+//   {
+//     Map: {
+//       screen: MapScreen
+//     },
+//     Camera: {
+//       screen: withNavigationFocus(TextCamera)
+//     },
+//     Setting: {
+//       screen: Profile
+//     }
+//   },
+//   {
+//     defaultNavigationOptions: ({ navigation }) => ({
+//       tabBarIcon: ({ focused, horizontal, tintColor }) => {
+//         const { routeName } = navigation.state;
+//         let IconComponent = Icon;
+//         let iconName = "";
+
+//         switch (routeName) {
+//           case "Map":
+//             iconName = "map";
+//             break;
+//           case "Camera":
+//             iconName = "linked-camera";
+//             break;
+//           case "Setting":
+//             iconName = "person-outline";
+//             break;
+//           default:
+//             return;
+//         }
+//         return <IconComponent name={iconName} size={25} color={tintColor} />;
+//       }
+//     }),
+//     tabBarOptions: {
+//       activeTintColor: "tomato",
+//       inactiveTintColor: "lightgrey"
+//     },
+//     initialRouteName: "Map",
+//     order: ["Map", "Camera", "Setting"]
+//   }
+// );
+
+// routing here for now maybe modulize later
+
+// const AuthStack = createStackNavigator(
+//   {
+//     SignIn: { screen: Login },
+//     Signup: { screen: Signup },
+//     Profile: { screen: Profile },
+//     EventDetail: { screen: EventDetailScreen },
+//     UserScreen: { screen: UserScreen },
+//     MainNavigator: {
+//       screen: MainNavigator,
+//       navigationOptions: {
+//         header: null
+//       }
+//     }
+//   },
+//   {
+//     initialRouteName: "SignIn",
+//     defaultNavigationOptions: { header: null, headerVisible: false }
+//   }
+// );
 
 const askPermissionAsync = async permissionType => {
   const { status: existingStatus } = await Permissions.getAsync(permissionType);
@@ -52,7 +130,7 @@ const sendPushToken = async ({ uid }) => {
   if (resp.status !== 200) throw new Error("Failed to send token to server");
 };
 
-const notificationSub = Notifications.addListener((notification) => {
+const notificationSub = Notifications.addListener(notification => {
   try {
     if (notification.origin === "received") {
       if (["CREATE_EVENT", "DELETE_EVENT"].includes(notification.data.type)) {
@@ -60,6 +138,10 @@ const notificationSub = Notifications.addListener((notification) => {
       }
       console.log("NOTIFICATION DISPATCH", notification.data);
       store.dispatch({ ...notification.data, type: `REMOTE_${notification.data.type}` });
+      store.dispatch({
+        ...notification.data,
+        type: `REMOTE_${notification.data.type}`
+      });
     }
   } catch (err) {
     console.log("Notification Dispatch Error", err);
@@ -69,25 +151,32 @@ const notificationSub = Notifications.addListener((notification) => {
 const fetchRestaurantDetail = async ({ restaurantId, restaurantName }) => {
   try {
     const restaurantResp = await request({
-      method: 'GET',
-      url: `${SERVER_URI}/restaurants/` + (restaurantId ? `${restaurantId}/` : `?name=${encodeURIComponent(restaurantName)}`)
+      method: "GET",
+      url:
+        `${SERVER_URI}/restaurants/` +
+        (restaurantId
+          ? `${restaurantId}/`
+          : `?name=${encodeURIComponent(restaurantName)}`)
     });
     if (restaurantResp.status !== 200) throw new Error(resp.data.error);
     const menuResp = await request({
-      method: 'GET',
+      method: "GET",
       url: `${SERVER_URI}/restaurants/${restaurantResp.data.id}/items`
     });
     if (menuResp.status !== 200) throw new Error(resp.data.error);
-    store.dispatch({ type: "SET_EVENT_DETAIL_DATA_MENU", restaurant: { ...restaurantResp.data, menuItems: menuResp.data } });
+    store.dispatch({
+      type: "SET_EVENT_DETAIL_DATA_MENU",
+      restaurant: { ...restaurantResp.data, menuItems: menuResp.data }
+    });
   } catch (err) {
     console.log("Fetch Restaurant Detail error", err);
   }
 };
 
-const fetchUserDetail = async (userId) => {
+const fetchUserDetail = async userId => {
   try {
     const resp = await request({
-      method: 'GET',
+      method: "GET",
       url: `${SERVER_URI}/users/${userId}`
     });
     if (resp.status !== 200) throw new Error(resp.data.error);
@@ -118,9 +207,15 @@ const loginStateReducer = (state, action) => {
             const userId = resp.data.user.id;
             if (!userEmail) throw new Error("Email missing from User Object");
             store.dispatch({ type: "FETCH_EVENTS" });
-            store.dispatch({ type: "ACTION_FETCH_USER_PROFILE", value: userId });
+            store.dispatch({
+              type: "ACTION_FETCH_USER_PROFILE",
+              value: userId
+            });
             store.dispatch({ type: "ACTION_FETCH_INTERESTS" });
-            store.dispatch({ type: "SET_LOGIN_CREDENTIALS", value: { id: userId, email: userEmail } });
+            store.dispatch({
+              type: "SET_LOGIN_CREDENTIALS",
+              value: { id: userId, email: userEmail }
+            });
             store.dispatch({ type: "SET_USER_ID", uid: userId });
             NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
           }
@@ -162,7 +257,10 @@ const signupStateReducer = (state, action) => {
           }
           await setSessionsToken(resp.data.session_token);
           store.dispatch({ type: "FETCH_EVENTS" });
-          store.dispatch({ type: "ACTION_FETCH_USER_PROFILE", value: resp.data.user.id });
+          store.dispatch({
+            type: "ACTION_FETCH_USER_PROFILE",
+            value: resp.data.user.id
+          });
           store.dispatch({ type: "ACTION_FETCH_INTERESTS" });
           store.dispatch({ type: "SET_USER_ID", uid: resp.data.user.id });
           store.dispatch({ type: "SET_NEW_USER", value: action.value });
@@ -199,10 +297,15 @@ const userProfileStateReducer = (state, action) => {
       // allInterests: [],
       username: null,
       genderChecked: null,
-      uid: null
+      uid: null,
+      id: null,
+      userImage: null
     };
 
   switch (action.type) {
+    case "SET_USER_IMAGE_URI":
+      return { ...state, userImage: action.value };
+
     case "ACTION_FETCH_USER_PROFILE":
       (async () => {
         const userResp = await request({
@@ -214,6 +317,9 @@ const userProfileStateReducer = (state, action) => {
         }
 
         const userProfile = userResp.data;
+        console.log(
+          "data come back from resp " + JSON.stringify(userResp.data)
+        );
         store.dispatch({
           type: "SET_INTEREST",
           interests: userProfile.interests.map(interest => interest.id)
@@ -225,6 +331,10 @@ const userProfileStateReducer = (state, action) => {
         store.dispatch({
           type: "SET_GENDER_CHECKED",
           check: userProfile.gender
+        });
+        store.dispatch({
+          type: "SET_USER_IMAGE_URI",
+          value: userProfile.profile_uri
         });
       })();
       return { ...state, id: action.value };
@@ -261,7 +371,12 @@ const userProfileStateReducer = (state, action) => {
     case "SET_INTEREST":
       return { ...state, userInterests: action.interests };
     case "ADD_INTEREST":
-      return { ...state, userInterests: Array.from(new Set([...state.userInterests, action.interest])) };
+      return {
+        ...state,
+        userInterests: Array.from(
+          new Set([...state.userInterests, action.interest])
+        )
+      };
     case "REMOVE_INTEREST":
       return {
         ...state,
@@ -269,12 +384,6 @@ const userProfileStateReducer = (state, action) => {
           interest => interest !== action.interest
         )
       };
-    // userInterests = {
-    //   id: currentUser.id,
-    //   name: userName,
-    //   gender: checked,
-    //   interests: userInterests
-    // };
     case "SAVE_PROFILE":
       (async () => {
         try {
@@ -292,6 +401,8 @@ const userProfileStateReducer = (state, action) => {
             throw new Error("Error while posting user_interests");
           }
 
+          console.log("before save image in SAVE_PROFILE " + state.userImage);
+
           if (state.username || state.genderChecked) {
             (async () => {
               const newUserProfileResp = await request({
@@ -301,7 +412,8 @@ const userProfileStateReducer = (state, action) => {
                   user_profile: {
                     id: state.uid,
                     username: state.username,
-                    user_gender: state.genderChecked
+                    user_gender: state.genderChecked,
+                    profile_uri: state.userImage
                   }
                 }
               });
@@ -326,9 +438,13 @@ const cameraStateReducer = (state, action) => {
   if (state === undefined)
     return {
       hasCameraPermission: null,
-      bounds: [{ text: "KFC", top: '40%', left: '40%', width: '10%', height: '10%' }]
+      bounds: [
+        // { text: "KFC", top: "40%", left: "40%", width: "10%", height: "10%" }
+      ]
     };
   switch (action.type) {
+    case "SET_SPINNER":
+      return { ...state, spinner: action.value };
     case "SET_CAMERA":
       return { ...state, camera: action.value };
     case "SET_CAMERA_STATUS":
@@ -337,7 +453,7 @@ const cameraStateReducer = (state, action) => {
       return { ...state, bounds: action.value };
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
-      (async () => {
+      store.dispatch({ type: "SET_SPINNER", value: true })(async () => {
         const resp = await request({
           method: "post",
           url: `${SERVER_URI}/images`,
@@ -388,9 +504,9 @@ const eventDetailReducer = (state, action) => {
     case "CREATE_EVENT":
       (async () => {
         const resp = await request({
-          method: 'post',
+          method: "post",
           url: `${SERVER_URI}/events`,
-          data: { 'event': { 'restaurant': { 'id': state.restaurant.id } } }
+          data: { event: { restaurant: { id: state.restaurant.id } } }
         });
         if (resp.status !== 200) throw new Error(resp.data.error);
         store.dispatch({ type: "SET_HOSTED_EVENT_ID", eventId: resp.data.id });
@@ -402,7 +518,36 @@ const eventDetailReducer = (state, action) => {
       fetchUserDetail(action.event.guest.id);
       fetchRestaurantDetail({ restaurantId: action.event.restaurant.id });
       NavigationService.navigate('MatchRequest');
+      return { ...state, user: action.event.guest };
+    default:
       return state;
+  }
+};
+
+const userStateReducer = (state, action) => {
+  if (state === undefined) return { status: null, id: null };
+
+  switch (action.type) {
+    case "SET_USER_ID":
+      sendPushToken({ id: action.uid });
+      return { ...state, id: action.uid };
+    case "SET_USER_STATUS":
+      return { ...state, status: action.status };
+    case "CANCEL_USER_STATUS":
+      return { ...state, status: null };
+    case "REMOTE_CANCEL_JOIN_EVENT":
+      NavigationService.navigate("MainNavigator");
+      return { ...state, status: "Waiting for Guest Dinner..." };
+    case "REMOTE_CANCEL_EVENT":
+      if (status !== null) {
+        Alert.alert("Event has been cancelled");
+        NavigationService.navigate("MainNavigator");
+      }
+      return { ...state, status: null };
+    case "CREATE_EVENT":
+      return { ...state, status: "Waiting for Guest Dinner..." };
+    case "JOIN_EVENT":
+      return { ...state, status: "Your Dinning Request has been sent!" };
     default:
       return state;
   }
@@ -632,8 +777,11 @@ const MainNavigator = createBottomTabNavigator(
       }
     }),
     tabBarOptions: {
-      activeTintColor: "tomato",
-      inactiveTintColor: "lightgrey"
+      style: {
+        backgroundColor: "#58B09C"
+      },
+      activeTintColor: "#7a42f4",
+      inactiveTintColor: "#fff"
     },
     initialRouteName: "Map",
     order: ["Map", "Camera", "Setting"]
@@ -646,6 +794,7 @@ const AuthStack = createStackNavigator(
   {
     SignIn: { screen: SignInScreen },
     Signup: { screen: SignUpScreen },
+
     Profile: { screen: ProfileScreen },
     EventDetail: { screen: EventDetailScreen },
     MatchRequest: { screen: MatchRequest },
@@ -656,8 +805,14 @@ const AuthStack = createStackNavigator(
         header: null
       }
     }
+    //  trying
+    // UserScreen: { screen: UserScreen },
+    // MenuScreen: { screen: MenuScreen }
+    //
   },
   {
+    // transitionConfig: () => fromLeft(1000),
+
     initialRouteName: "SignIn",
     defaultNavigationOptions: { header: null, headerVisible: false }
   }
@@ -677,25 +832,30 @@ const withProvider = AppComponent => {
 
 const mapStateToProps = ({ events }) => ({ ...events });
 
-const mapDispatchToProps = (dispatch) => ({
-  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" })
-})
+const mapDispatchToProps = dispatch => ({
+  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" }),
+  dispatchSetSpinner: status => dispatch({ type: "SET_SPINNER", status })
+});
 
-const App = connect(mapStateToProps, mapDispatchToProps)
-  (({ fetchEvents }) => {
-    useEffect(() => {
-      (async () => {
-        if (await isSessionValid()) fetchEvents();
-      })();
-    }, []);
-    return (
-      <View style={{ height: "100%", background: "black" }}>
-        <AppNavigator ref={navigatorRef => {
+const App = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(({ fetchEvents }) => {
+  useEffect(() => {
+    (async () => {
+      if (await isSessionValid()) fetchEvents();
+    })();
+  }, []);
+  return (
+    <View style={{ height: "100%", background: "black" }}>
+      <AppNavigator
+        ref={navigatorRef => {
           NavigationService.setTopLevelNavigator(navigatorRef);
-        }} />
-        <StatusFooter />
-      </View>
-    );
-  });
+        }}
+      />
+      <StatusFooter />
+    </View>
+  );
+});
 
 export default withProvider(App);

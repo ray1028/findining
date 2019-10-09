@@ -138,11 +138,7 @@ const UserScreen = connect(
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
         <View>
-          <Avatar
-            rounded
-            source={require("../assets/images/ray.png")}
-            size={170}
-          />
+          <Avatar rounded source={{ uri: user.profile_uri }} size={170} />
           <Badge
             status="success"
             containerStyle={{ position: "absolute", top: -4, right: -4 }}
@@ -179,13 +175,3 @@ const UserScreen = connect(
   );
 });
 export default UserScreen;
-// const mapStateToProps = state => {
-//   return {
-//     ...state.userProfile
-//   };
-// };
-
-// export default connect(
-//   mapStateToProps,
-//   mapDispatchToProps
-// )(UserScreen);

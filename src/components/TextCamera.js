@@ -1,53 +1,18 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { Button, Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  Button,
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  ActivityIndicator
+} from "react-native";
 import * as Permissions from "expo-permissions";
 import { Camera } from "expo-camera";
 import { Header } from "react-native-elements";
 import MapScreen from "./MapScreen";
-
-// Object {
-//   "ColorSpace": 1,
-//   "ComponentsConfiguration": "???",
-//   "Compression": 6,
-//   "DateTime": "2019:09:26 15:46:36",
-//   "DateTimeDigitized": "2019:09:26 15:46:36",
-//   "DateTimeOriginal": "2019:09:26 15:46:36",
-//   "DigitalZoomRatio": 1,
-//   "ExifVersion": "0220",
-//   "ExposureBiasValue": 0,
-//   "ExposureMode": 0,
-//   "ExposureProgram": 0,
-//   "ExposureTime": 0.029999,
-//   "FNumber": 2,
-//   "Flash": 0,
-//   "FlashpixVersion": "0100",
-//   "FocalLength": 3.5,
-//   "ISOSpeedRatings": 178,
-//   "ImageDescription": "",
-//   "ImageLength": 4608,
-//   "ImageWidth": 3456,
-//   "InteroperabilityIndex": "R98",
-//   "JPEGInterchangeFormat": 1268,
-//   "JPEGInterchangeFormatLength": 7216,
-//   "LightSource": 255,
-//   "Make": "asus",
-//   "MeteringMode": 1,
-//   "Model": "ASUS_X018D",
-//   "Orientation": 1,
-//   "PixelXDimension": 3456,
-//   "PixelYDimension": 4608,
-//   "ResolutionUnit": 2,
-//   "SceneCaptureType": 0,
-//   "Software": "MediaTek Camera Application",
-//   "SubSecTime": "97",
-//   "SubSecTimeDigitized": "97",
-//   "SubSecTimeOriginal": "97",
-//   "WhiteBalance": 0,
-//   "XResolution": 72,
-//   "YCbCrPositioning": 2,
-//   "YResolution": 72,
-// }
 
 const mapStateToProps = ({ cameraView }) => cameraView;
 const mapDispatchToProps = dispatch => ({
@@ -57,13 +22,13 @@ const mapDispatchToProps = dispatch => ({
   setCamera: camera => {
     dispatch({ type: "SET_CAMERA", value: camera });
   },
-  dispatchUploadEvent: (image) => {
+  dispatchUploadEvent: image => {
     dispatch({ type: "ACTION_IMAGE_AWS", value: image });
   },
   dispatchResetCamera: () => {
     dispatch({ type: "RESET_CAMERA" });
   },
-  setOpenRestaurantByName: (restaurantName) => {
+  setOpenRestaurantByName: restaurantName => {
     dispatch({ type: "SET_OPEN_RESTAURANT_NAME", restaurantName });
   }
 });
@@ -90,7 +55,9 @@ const styles = StyleSheet.create({
     height: 100,
     width: 100,
     borderWidth: 15,
-    backgroundColor: "white",
+    backgroundColor: "#58B09C",
+    opacity: 10,
+    // backgroundColor: "white",
     borderStyle: "solid",
     borderColor: "orange",
     opacity: 2,
@@ -101,8 +68,11 @@ const styles = StyleSheet.create({
   }
 });
 
-const TextCamera = connect(mapStateToProps, mapDispatchToProps)
-  (({
+const TextCamera = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(
+  ({
     hasCameraPermission,
     camera,
     bounds,
@@ -112,10 +82,10 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
     dispatchUploadEvent,
     dispatchResetCamera,
     setOpenRestaurantByName,
-    navigation
+    navigation,
+    spinner
   }) => {
     useEffect(() => {
-      // cleaning up camera
       if (!isFocused) {
         dispatchResetCamera();
         return;
@@ -127,7 +97,7 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         setCameraPermission(status);
       })();
-    }, [])
+    }, []);
 
     if (!isFocused) {
       return <View />;
@@ -141,12 +111,17 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
       return (
         <View style={{ flex: 1 }}>
           <Header
-            style={styles.headerBar}
-            centerComponent={{ text: "Findining" }}
-            backgroundColor="#3A445D"
-          >
-            {/* <MapScreen /> */}
-          </Header>
+            centerComponent={{
+              text: "Findining",
+              style: {
+                color: "white",
+                fontWeight: "bold",
+                fontSize: 30,
+                letterSpacing: 1
+              }
+            }}
+            backgroundImage={require("../assets/images/camera-top.jpeg")}
+          ></Header>
           <View style={styles.topContainer}>
             <Camera
               style={{ flex: 1, position: "relative" }}
@@ -159,14 +134,20 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
                   <TouchableOpacity
                     key={index}
                     onPress={() => {
-                      try {                        
+                      try {
                         setOpenRestaurantByName(bound.text);
-                        navigation.navigate('EventDetail');
+                        navigation.navigate("EventDetail");
                       } catch (err) {
                         console.log("Open Restaurant error", err);
                       }
                     }}
-                    style={{ ...bound, position: "absolute", borderWidth: 3 }}
+                    style={{
+                      ...bound,
+                      position: "absolute",
+                      borderWidth: 3,
+                      padding: 10,
+                      borderColor: "#58B09C"
+                    }}
                   ></TouchableOpacity>
                 );
               })}
@@ -189,10 +170,51 @@ const TextCamera = connect(mapStateToProps, mapDispatchToProps)
                 }
               }}
             ></TouchableOpacity>
+            {console.log("the spinner is now set to be " + spinner)}
+            {spinner && <ActivityIndicator size="large" color="red" />}
+            {/* {spinner ? (
+              <ActivityIndicator size="large" color="red" />
+            ) : (
+              <TouchableOpacity
+                style={styles.captureButton}
+                onPress={async () => {
+                  if (camera) {
+                    const photo = await camera.takePictureAsync({
+                      exif: true,
+                      base64: true,
+                      skipProcessing: true
+                    });
+                    dispatchUploadEvent({
+                      image: photo.base64,
+                      meta: photo.exif
+                    });
+                  }
+                }}
+              ></TouchableOpacity>
+            )} */}
+            {/* {console.log("the spinner is now set to be " + spinner)} */}
+            {/* <ActivityIndicator size="large" color="red" /> */}
+            {/* <TouchableOpacity
+              style={styles.captureButton}
+              onPress={async () => {
+                if (camera) {
+                  const photo = await camera.takePictureAsync({
+                    exif: true,
+                    base64: true,
+                    skipProcessing: true
+                  });
+                  dispatchUploadEvent({
+                    image: photo.base64,
+                    meta: photo.exif
+                  });
+                }
+              }}
+            ></TouchableOpacity> */}
           </View>
         </View>
       );
     }
-  });
+  }
+);
 
 export default TextCamera;

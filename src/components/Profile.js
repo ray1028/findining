@@ -1,8 +1,20 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, ImageBackground, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  Text,
+  TouchableWithoutFeedback,
+  TouchableOpacity
+} from "react-native";
 import { Input, Icon, Avatar, withBadge, Button } from "react-native-elements";
 import { connect } from "react-redux";
-import { TouchableOpacity } from "react-native";
+
+//
+import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
+import * as Permissions from "expo-permissions";
+//
 
 const options = [
   {
@@ -105,10 +117,35 @@ const Profile = ({
   usernameChangeHandler,
   navigation,
   saveProfile,
+  userImage,
+  dispatchUpdateUserImage,
   // current logged in user and user interestss
   // allInterests,
   currentUserAndInterests
 }) => {
+  // image picker
+  useEffect(() => {
+    getPermissionAsync = async () => {
+      // if (Constants.platform.ios) {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+      }
+    };
+  }, []);
+
+  _pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3]
+    });
+
+    if (!result.cancelled) {
+      dispatchUpdateUserImage(result.uri);
+    }
+  };
+  console.log("current image is " + userImage);
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
@@ -121,11 +158,15 @@ const Profile = ({
             alignItems: "center"
           }}
         >
-          <BadgedIcon
-            source={require("../assets/images/ray.png")}
-            rounded
-            size={170}
-          />
+          <TouchableWithoutFeedback onPress={() => _pickImage()}>
+            <BadgedIcon
+              // source={require("../assets/images/ray.png")}
+              // source={userImage}
+              source={{ uri: userImage }}
+              rounded
+              size={170}
+            />
+          </TouchableWithoutFeedback>
         </ImageBackground>
       </View>
 
@@ -206,8 +247,7 @@ const Profile = ({
           containerStyle={{ width: 100, marginTop: 20 }}
           buttonStyle={{
             backgroundColor: "orange",
-            borderRadius: 40,
-            fontSize: 20
+            borderRadius: 40
           }}
           onPress={() => saveProfile()}
         />
@@ -312,6 +352,11 @@ const mapDispatchToProps = dispatch => {
       dispatch({
         type: "UPDATE_NEW_USER_INTERESTS",
         value: updatedUserInterests
+      }),
+    dispatchUpdateUserImage: uri =>
+      dispatch({
+        type: "SET_USER_IMAGE_URI",
+        value: uri
       })
   };
 };
