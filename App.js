@@ -423,8 +423,8 @@ const cameraStateReducer = (state, action) => {
       ]
     };
   switch (action.type) {
-    case "SET_SPINNER":
-      return { ...state, spinner: action.value };
+    // case "SET_SPINNER":
+    //   return { ...state, spinner: action.value };
     case "SET_CAMERA":
       return { ...state, camera: action.value };
     case "SET_CAMERA_STATUS":
@@ -433,7 +433,7 @@ const cameraStateReducer = (state, action) => {
       return { ...state, bounds: action.value };
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
-      store.dispatch({ type: "SET_SPINNER", value: true })(async () => {
+      (async () => {
         const resp = await request({
           method: "post",
           url: `${SERVER_URI}/images`,
@@ -753,8 +753,7 @@ const withProvider = AppComponent => {
 const mapStateToProps = ({ events }) => ({ ...events });
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" }),
-  dispatchSetSpinner: status => dispatch({ type: "SET_SPINNER", status })
+  fetchEvents: () => dispatch({ type: "FETCH_EVENTS" })
 });
 
 const App = connect(

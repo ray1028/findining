@@ -57,7 +57,6 @@ const styles = StyleSheet.create({
     borderWidth: 15,
     backgroundColor: "#58B09C",
     opacity: 10,
-    // backgroundColor: "white",
     borderStyle: "solid",
     borderColor: "orange",
     opacity: 2,
@@ -82,8 +81,7 @@ const TextCamera = connect(
     dispatchUploadEvent,
     dispatchResetCamera,
     setOpenRestaurantByName,
-    navigation,
-    spinner
+    navigation
   }) => {
     useEffect(() => {
       if (!isFocused) {
@@ -145,7 +143,7 @@ const TextCamera = connect(
                       ...bound,
                       position: "absolute",
                       borderWidth: 3,
-                      padding: 10,
+                      padding: 5,
                       borderColor: "#58B09C"
                     }}
                   ></TouchableOpacity>
@@ -170,46 +168,6 @@ const TextCamera = connect(
                 }
               }}
             ></TouchableOpacity>
-            {console.log("the spinner is now set to be " + spinner)}
-            {spinner && <ActivityIndicator size="large" color="red" />}
-            {/* {spinner ? (
-              <ActivityIndicator size="large" color="red" />
-            ) : (
-              <TouchableOpacity
-                style={styles.captureButton}
-                onPress={async () => {
-                  if (camera) {
-                    const photo = await camera.takePictureAsync({
-                      exif: true,
-                      base64: true,
-                      skipProcessing: true
-                    });
-                    dispatchUploadEvent({
-                      image: photo.base64,
-                      meta: photo.exif
-                    });
-                  }
-                }}
-              ></TouchableOpacity>
-            )} */}
-            {/* {console.log("the spinner is now set to be " + spinner)} */}
-            {/* <ActivityIndicator size="large" color="red" /> */}
-            {/* <TouchableOpacity
-              style={styles.captureButton}
-              onPress={async () => {
-                if (camera) {
-                  const photo = await camera.takePictureAsync({
-                    exif: true,
-                    base64: true,
-                    skipProcessing: true
-                  });
-                  dispatchUploadEvent({
-                    image: photo.base64,
-                    meta: photo.exif
-                  });
-                }
-              }}
-            ></TouchableOpacity> */}
           </View>
         </View>
       );

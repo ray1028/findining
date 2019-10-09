@@ -47,6 +47,7 @@ const LoginForm = ({ currentUser, dispatchLoginCredentials, navigation }) => {
         autoCorrect={false}
         autoCapitalize="none"
         underlineColorAndroid="transparent"
+        secureTextEntry={true}
         leftIcon={
           <Icon
             name="lock"
