@@ -57,7 +57,6 @@ const styles = StyleSheet.create({
     borderWidth: 15,
     backgroundColor: "#58B09C",
     opacity: 10,
-    // backgroundColor: "white",
     borderStyle: "solid",
     borderColor: "orange",
     opacity: 2,
@@ -82,8 +81,7 @@ const TextCamera = connect(
     dispatchUploadEvent,
     dispatchResetCamera,
     setOpenRestaurantByName,
-    navigation,
-    spinner
+    navigation
   }) => {
     useEffect(() => {
       if (!isFocused) {
@@ -145,7 +143,7 @@ const TextCamera = connect(
                       ...bound,
                       position: "absolute",
                       borderWidth: 3,
-                      padding: 10,
+                      padding: 5,
                       borderColor: "#58B09C"
                     }}
                   ></TouchableOpacity>

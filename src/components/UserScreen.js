@@ -1,5 +1,10 @@
 import React from "react";
-import { View, StyleSheet, ImageBackground } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity
+} from "react-native";
 import {
   Icon,
   Avatar,
@@ -10,7 +15,6 @@ import {
   Tooltip
 } from "react-native-elements";
 import { connect } from "react-redux";
-import { TouchableOpacity } from "react-native";
 
 const BadgedIcon = withBadge(
   <Icon
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     flex: 0.6,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#3A445D"
   },
@@ -133,21 +137,33 @@ const UserScreen = connect(
   mapStateToProps,
   mapDispatchToProps
 )(({ user }) => {
-  console.log("user who init the convo " + JSON.stringify(user));
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
         <View>
-          <Avatar rounded source={{ uri: user.profile_uri }} size={170} />
+          <Avatar rounded source={{ uri: user.profile_uri }} size={130} />
           <Badge
             status="success"
-            containerStyle={{ position: "absolute", top: -4, right: -4 }}
+            containerStyle={{ position: "absolute", top: 5, right: 40 }}
           />
+          <View
+            style={{
+              marginTop: 10,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <Text h2>{user.name}</Text>
+            {user.gender === "female" ? (
+              <Icon type="font-awesome" name="female" color="red" size={20} />
+            ) : (
+              <Icon type="font-awesome" name="male" color="blue" size={20} />
+            )}
+          </View>
         </View>
       </View>
       <View style={styles.bottomContainer}>
-        <Text h1>{user.name}</Text>
-        <Text h1>{user.gender}</Text>
         <View style={styles.interestContainer}>
           {user.interests.map(interest => {
             return (
