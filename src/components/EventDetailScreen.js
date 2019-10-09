@@ -110,7 +110,6 @@ const EventWrapper = connect(
   ({
     navigation,
     user,
-    restaurant,
     hostCreateEvent,
     guestJoinEvent,
     cancelEventSelection

@@ -1,4 +1,6 @@
+import React, { Component, useEffect } from "react";
 import { Text, TouchableOpacity, View, AsyncStorage, Alert } from "react-native";
+
 import { connect } from "react-redux";
 import SignInScreen from "./src/components/Login";
 import { createStore, combineReducers } from "redux";
@@ -9,31 +11,20 @@ import MapScreen from "./src/components/MapScreen";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ProfileScreen from "./src/components/Profile";
 import axios from "axios";
-import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createAppContainer, withNavigationFocus, NavigationActions } from "react-navigation";
-import React, { useEffect } from "react";
-import { AsyncStorage, View } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { createStackNavigator } from "react-navigation-stack";
-import { createBottomTabNavigator } from "react-navigation-tabs";
-import { connect, Provider } from "react-redux";
-import { combineReducers, createStore } from "redux";
-import { SERVER_URI } from "./const";
-import NavigationService from "./NavigationService";
+import { Notifications } from "expo";
 import EventDetailScreen from "./src/components/EventDetailScreen";
-import SignInScreen from "./src/components/Login";
-import MapScreen from "./src/components/MapScreen";
 import MatchRequest from "./src/components/MatchRequest";
-import ProfileScreen from "./src/components/Profile";
-import SignUpScreen from "./src/components/Signup";
 import StatusFooter from "./src/components/StatusFooter";
 import DiningScreen from "./src/components/DiningScreen";
 import { SERVER_URI } from "./const";
-import TextCamera from "./src/components/TextCamera";
-import { isSessionValid, request, setSessionsToken } from "./src/helper/helper";
+import { request, setSessionsToken, isSessionValid } from "./src/helper/helper";
+
+import NavigationService from "./NavigationService";
 
 // import { fromLeft, fromRight } from "react-navigation-transitions";
 
@@ -334,7 +325,8 @@ const userProfileStateReducer = (state, action) => {
         });
         store.dispatch({
           type: "SET_USER_IMAGE_URI",
-          value: userProfile.profile_uri
+          // value: userProfile.profile_uri
+          value: "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
         });
       })();
       return { ...state, id: action.value };
@@ -407,13 +399,14 @@ const userProfileStateReducer = (state, action) => {
             (async () => {
               const newUserProfileResp = await request({
                 method: "PATCH",
-                url: `${SERVER_URI}/users/${state.uid}`,
+                url: `${SERVER_URI}/users/${state.uid || state.id}`,
                 data: {
                   user_profile: {
-                    id: state.uid,
+                    id: state.uid || state.id,
                     username: state.username,
                     user_gender: state.genderChecked,
-                    profile_uri: state.userImage
+                    // profile_uri: state.userImage
+                    profile_uri: "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
                   }
                 }
               });
@@ -435,13 +428,13 @@ const userProfileStateReducer = (state, action) => {
 };
 
 const cameraStateReducer = (state, action) => {
-  if (state === undefined)
-    return {
+  const defaultState = {
       hasCameraPermission: null,
       bounds: [
-        // { text: "KFC", top: "40%", left: "40%", width: "10%", height: "10%" }
+        { text: "KFC", top: "0%", left: "0%", width: "10%", height: "10%" }
       ]
     };
+  if (state === undefined) return defaultState;
   switch (action.type) {
     case "SET_SPINNER":
       return { ...state, spinner: action.value };
@@ -453,7 +446,8 @@ const cameraStateReducer = (state, action) => {
       return { ...state, bounds: action.value };
     case "ACTION_IMAGE_AWS":
       state.camera.pausePreview();
-      store.dispatch({ type: "SET_SPINNER", value: true })(async () => {
+      // store.dispatch({ type: "SET_SPINNER", value: true })
+      (async () => {
         const resp = await request({
           method: "post",
           url: `${SERVER_URI}/images`,
@@ -667,7 +661,7 @@ const eventsReducer = (state, action) => {
             console.log("Error while joining event", err);
           }
         })();
-        return state;
+        return state; 
       case "CLOSE_EVENT_DETAIL_SCREEN":
         return { ...state, openEventId: null };
       default:

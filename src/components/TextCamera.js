@@ -170,46 +170,6 @@ const TextCamera = connect(
                 }
               }}
             ></TouchableOpacity>
-            {console.log("the spinner is now set to be " + spinner)}
-            {spinner && <ActivityIndicator size="large" color="red" />}
-            {/* {spinner ? (
-              <ActivityIndicator size="large" color="red" />
-            ) : (
-              <TouchableOpacity
-                style={styles.captureButton}
-                onPress={async () => {
-                  if (camera) {
-                    const photo = await camera.takePictureAsync({
-                      exif: true,
-                      base64: true,
-                      skipProcessing: true
-                    });
-                    dispatchUploadEvent({
-                      image: photo.base64,
-                      meta: photo.exif
-                    });
-                  }
-                }}
-              ></TouchableOpacity>
-            )} */}
-            {/* {console.log("the spinner is now set to be " + spinner)} */}
-            {/* <ActivityIndicator size="large" color="red" /> */}
-            {/* <TouchableOpacity
-              style={styles.captureButton}
-              onPress={async () => {
-                if (camera) {
-                  const photo = await camera.takePictureAsync({
-                    exif: true,
-                    base64: true,
-                    skipProcessing: true
-                  });
-                  dispatchUploadEvent({
-                    image: photo.base64,
-                    meta: photo.exif
-                  });
-                }
-              }}
-            ></TouchableOpacity> */}
           </View>
         </View>
       );
