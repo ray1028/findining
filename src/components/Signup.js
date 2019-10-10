@@ -57,6 +57,7 @@ const Signup = ({ dispatchSignupCredentials, currentUser, navigation }) => {
         autoCapitalize="none"
         underlineColorAndroid="transparent"
         inputStyle={{ color: "white" }}
+        secureTextEntry={true}
         leftIcon={
           <Icon
             name="lock"

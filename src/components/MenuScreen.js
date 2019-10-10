@@ -38,8 +38,8 @@ const restaurant = {
   // averageCostPerPerson: 33.25,
   // averageCostPerPint: 6.19,
   // accepts: ["CASH", "CREDIT", "DEBIT"],
-  openHour: "10am",
-  closeHour: "2pm",
+  open: "10am",
+  closed: "2pm",
   menu: [
     { name: "Turkey Club", desc: desc[0], type: "sandwich" },
     { name: "Onion Rings", desc: desc[0], type: "onion_rings" },
@@ -60,51 +60,62 @@ const restaurant = {
 const getTypeImage = type => images[type][0];
 
 const mapStateToProps = ({ eventDetail }) => eventDetail;
-const mapDispatchToProps = (dispatch) => ({});
-const MenuScreen = connect(mapStateToProps, mapDispatchToProps)
-  (({ restaurant }) => {
-    if (!restaurant) {
-      return (<View />); //@TODO Loading screen
-    }
-    return (
-      <View>
-        <View
+const mapDispatchToProps = dispatch => ({});
+const MenuScreen = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(({ restaurant }) => {
+  if (!restaurant) {
+    return <View />; //@TODO Loading screen
+  }
+  return (
+    <View>
+      <View
+        style={{
+          borderBottomColor: "silver",
+          borderBottomWidth: 4,
+          padding: 10
+        }}
+      >
+        <Text
           style={{
-            borderBottomColor: "silver",
-            borderBottomWidth: 4,
-            padding: 10
+            fontSize: 34,
+            fontWeight: "bold",
+            textAlign: "center",
+            marginTop: 15
           }}
         >
-          <Text style={{ fontSize: 34, fontWeight: "bold", textAlign: "center" }}>
-            {restaurant.name}
-          </Text>
-          <Text style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}>
-            {restaurant.openHour} - {restaurant.closeHour}
-          </Text>
-        </View>
-        <FlatList
-          style={{ paddingTop: 10 }}
-          data={restaurant.menuItems}
-          keyExtractor={(item, i) => i}
-          renderItem={({ item }) => {
-            return (
-              <ListItem
-                leftAvatar={{
-                  rounded: true,
-                  source: { uri: item['image_uri'] },
-                  size: "large"
-                }}
-                title={item.name}
-                subtitle={item.description}
-                bottomDivider={true}
-                badge={{ status: "primary" }}
-              />
-            );
-          }}
-        />
+          {restaurant.name}
+        </Text>
+        <Text
+          style={{ fontSize: 12, fontStyle: "italic", textAlign: "center" }}
+        >
+          {restaurant.open} - {restaurant.closed}
+        </Text>
       </View>
-    );
-  });
+      <FlatList
+        style={{ paddingTop: 10 }}
+        data={restaurant.menuItems}
+        keyExtractor={(item, i) => i}
+        renderItem={({ item }) => {
+          return (
+            <ListItem
+              leftAvatar={{
+                rounded: true,
+                source: { uri: item["image_uri"] },
+                size: "large"
+              }}
+              title={item.name}
+              subtitle={item.description}
+              bottomDivider={true}
+              badge={{ status: "primary" }}
+            />
+          );
+        }}
+      />
+    </View>
+  );
+});
 
 // const mapStateToProps = ({ restaurantMenu }) => restaurantMenu;
 

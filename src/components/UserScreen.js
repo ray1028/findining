@@ -138,32 +138,49 @@ const UserScreen = connect(
   mapDispatchToProps
 )(({ user }) => {
   if (!user) {
-    return (<View />);
+    return <View />;
   }
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
-        <View>
-          <Avatar rounded source={{ uri: user.profile_uri }} size={130} />
-          <Badge
-            status="success"
-            containerStyle={{ position: "absolute", top: 5, right: 40 }}
-          />
-          <View
-            style={{
-              marginTop: 10,
-              width: "100%",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <Text h2>{user.name}</Text>
-            {user.gender === "female" ? (
-              <Icon type="font-awesome" name="female" color="red" size={20} />
-            ) : (
-              <Icon type="font-awesome" name="male" color="blue" size={20} />
-            )}
-          </View>
+        {/* <View> */}
+        <Avatar
+          rounded
+          source={{ uri: user.profile_uri }}
+          size={130}
+          containerStyle={{ marginTop: 10 }}
+        />
+        <Badge
+          status="success"
+          containerStyle={{ position: "absolute", top: 5, right: 40 }}
+        />
+        <View
+          style={{
+            marginTop: 10,
+            width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Text h2>{user.name}</Text>
+          {user.gender === "female" ? (
+            <Icon
+              type="font-awesome"
+              name="female"
+              color="red"
+              size={40}
+              containerStyle={{ marginTop: 10 }}
+            />
+          ) : (
+            <Icon
+              type="font-awesome"
+              name="male"
+              color="blue"
+              size={40}
+              containerStyle={{ marginTop: 10 }}
+            />
+          )}
+          {/* </View> */}
         </View>
       </View>
       <View style={styles.bottomContainer}>
