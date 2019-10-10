@@ -13,27 +13,6 @@ import * as Permissions from "expo-permissions";
 import Constants from "expo-constants";
 import { Image } from "react-native-elements";
 
-let fakeUsersObj = [
-  {
-    id: 1,
-    iconImage: require("../assets/images/findining.png"),
-    latitude: 43.644152,
-    longitude: -79.402227
-  },
-  {
-    id: 2,
-    iconImage: require("../assets/images/findining.png"),
-    latitude: 43.644154,
-    longitude: -79.402223
-  },
-  {
-    id: 3,
-    iconImage: require("../assets/images/findining.png"),
-    latitude: 43.6441543,
-    longitude: -79.402222
-  }
-];
-
 let location = {};
 
 const mapStateToProps = state => ({
@@ -72,9 +51,6 @@ const MapScreen = connect(
         console.log("is thi s a device ? " + Constants.isDevice);
       } else {
         location = await _getLocationAsync();
-        console.log(
-          "currrent location for your device is " + JSON.stringify(location)
-        );
       }
     })();
   }, []);
@@ -82,7 +58,7 @@ const MapScreen = connect(
   // watcher for users current locations changes
 
   Location.watchPositionAsync({ timeInterval: 3000 }, () => {
-    console.log("the location is now changed");
+    
   });
 
   return (

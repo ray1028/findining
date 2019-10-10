@@ -137,6 +137,9 @@ const UserScreen = connect(
   mapStateToProps,
   mapDispatchToProps
 )(({ user }) => {
+  if (!user) {
+    return (<View />);
+  }
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>

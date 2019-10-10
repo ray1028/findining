@@ -17,7 +17,11 @@ const DininingScreen = connect(mapStateToProps, mapDispatchToProps)
         {/* <View style={{ flex: 1, backgroundColor: 'grey' }} /> */}
         <MenuScreen />
         <View style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'transparent', height: 120, alignItems: 'center' }} >
-          <Button containerStyle={{ width: '50%' }} title="Finish Dining" onPress={finishDining} />
+          <Button containerStyle={{ width: '50%' }} title="Finish Dining" onPress={() => {
+            finishDining();
+            // navigation.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
+            navigation.navigate('MainNavigator');
+          }} />
           <Rating
             startingValue={`{${rating}}`}
             onFinishRating={sendRating}

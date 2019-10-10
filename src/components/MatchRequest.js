@@ -13,7 +13,7 @@ const mapDispatchToProps = (dispatch) => ({
   rejectMatchRequest: () => dispatch({ type: 'REJECT_MATCH_REQUEST' })
 });
 const MatchRequest = connect(mapStateToProps, mapDispatchToProps)
-  (({ navigation, acceptMatchRequest }) => {
+  (({ navigation, acceptMatchRequest, rejectMatchRequest }) => {
     return (
       <View style={{flex: 1}}>
         <OverlayUserScreen
