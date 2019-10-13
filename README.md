@@ -14,7 +14,8 @@ It offers a unique one-on-one dining experience that allows users to take a pict
 
 Users will be able to create an event that will show your location to other users interested in sharing a dining experience with you.
 
-![test](https://github.com/ray1028/findining/blob/master/docs/login.jpg | width=48)
+<img src="https://github.com/ray1028/findining/blob/master/docs/login.jpg" width=250 height=250 />
+
 
 ## Technical Specifications
 
