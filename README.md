@@ -14,25 +14,25 @@ It offers a unique one-on-one dining experience that allows users to take a pict
 
 Users will be able to create an event that will show your location to other users interested in sharing a dining experience with you.
 
-User Login 
+User Login <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/login.jpg" width=300 height=600 />
 
-User Profile
+User Profile <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/profile-pic.jpg" width=300 height=600 />
 
-Main Screen where users can see others who created an event
+Main Screen where users can see others who created an event <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/even-map.jpg" width=300 height=600 />
 
-Camera screen to take pictures of restaurant signs
+Camera screen to take pictures of restaurant signs <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/camera.jpg" width=300 height=600 />
 
-The application then highlights the restaurant signs for user to select
+The application then highlights the restaurant signs for user to select <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/camera2.jpg" width=300 height=600 />
 
-Base on the user's selection, a menu item screen will be display to the user
+Base on the user's selection, a menu item screen will be display to the user <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/menu.jpg" width=300 height=600 />
 
-User can then create an event and wait for others to join them
+User can then create an event and wait for others to join them <br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/sent-event.jpg" width=300 height=600 />
 
 
