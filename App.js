@@ -1,5 +1,11 @@
 import React, { Component, useEffect } from "react";
-import { Text, TouchableOpacity, View, AsyncStorage, Alert } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  AsyncStorage,
+  Alert
+} from "react-native";
 
 import { connect } from "react-redux";
 import SignInScreen from "./src/components/Login";
@@ -14,7 +20,11 @@ import axios from "axios";
 import * as Permissions from "expo-permissions";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { createBottomTabNavigator } from "react-navigation-tabs";
-import { createAppContainer, withNavigationFocus, NavigationActions } from "react-navigation";
+import {
+  createAppContainer,
+  withNavigationFocus,
+  NavigationActions
+} from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { Notifications } from "expo";
 import EventDetailScreen from "./src/components/EventDetailScreen";
@@ -128,7 +138,10 @@ const notificationSub = Notifications.addListener(notification => {
         Notifications.dismissNotificationAsync(notification.notificationId);
       }
       console.log("NOTIFICATION DISPATCH", notification.data);
-      store.dispatch({ ...notification.data, type: `REMOTE_${notification.data.type}` });
+      store.dispatch({
+        ...notification.data,
+        type: `REMOTE_${notification.data.type}`
+      });
       store.dispatch({
         ...notification.data,
         type: `REMOTE_${notification.data.type}`
@@ -208,7 +221,11 @@ const loginStateReducer = (state, action) => {
               value: { id: userId, email: userEmail }
             });
             store.dispatch({ type: "SET_USER_ID", uid: userId });
-            NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
+            NavigationService.navigate(
+              "MainNavigator",
+              {},
+              NavigationActions.navigate({ routeName: "Map" })
+            );
           }
 
           // else {
@@ -324,7 +341,8 @@ const userProfileStateReducer = (state, action) => {
         store.dispatch({
           type: "SET_USER_IMAGE_URI",
           // value: userProfile.profile_uri
-          value: "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
+          value:
+            "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
         });
       })();
       return { ...state, id: action.value };
@@ -404,7 +422,8 @@ const userProfileStateReducer = (state, action) => {
                     username: state.username,
                     user_gender: state.genderChecked,
                     // profile_uri: state.userImage
-                    profile_uri: "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
+                    profile_uri:
+                      "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
                   }
                 }
               });
@@ -412,7 +431,11 @@ const userProfileStateReducer = (state, action) => {
                 throw new Error("Error while posting data to user profile");
               }
             })();
-            NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
+            NavigationService.navigate(
+              "MainNavigator",
+              {},
+              NavigationActions.navigate({ routeName: "Map" })
+            );
           }
         } catch (err) {
           console.log("Save Profile Error", err);
@@ -429,7 +452,7 @@ const cameraStateReducer = (state, action) => {
   const defaultState = {
     hasCameraPermission: null,
     bounds: [
-      { text: "KFC", top: "0%", left: "0%", width: "10%", height: "10%" }
+      // { text: "KFC", top: "0%", left: "0%", width: "10%", height: "10%" }
     ]
   };
   if (state === undefined) return defaultState;
@@ -477,7 +500,12 @@ const cameraStateReducer = (state, action) => {
 };
 
 const eventDetailReducer = (state, action) => {
-  const defaultState = { selectedScreen: 'User', user: null, restaurant: null, rating: null };
+  const defaultState = {
+    selectedScreen: "User",
+    user: null,
+    restaurant: null,
+    rating: null
+  };
   if (state === undefined) return defaultState;
 
   switch (action.type) {
@@ -509,7 +537,7 @@ const eventDetailReducer = (state, action) => {
     case "REMOTE_JOIN_EVENT":
       fetchUserDetail(action.event.guest.id);
       fetchRestaurantDetail({ restaurantId: action.event.restaurant.id });
-      NavigationService.navigate('MatchRequest');
+      NavigationService.navigate("MatchRequest");
       return { ...state, user: action.event.guest };
     default:
       return state;
@@ -518,11 +546,24 @@ const eventDetailReducer = (state, action) => {
 
 const eventsReducer = (state, action) => {
   try {
-    if (state === undefined) return { visible: [], openEventId: null, status: null, message: null, uid: null };
+    if (state === undefined)
+      return {
+        visible: [],
+        openEventId: null,
+        status: null,
+        message: null,
+        uid: null
+      };
     switch (action.type) {
       case "SET_EVENTS":
         for (let event of action.events) {
-          if (state.uid === event.host.id) return { ...state, openEventId: event.id, status: 'WAITING_FOR_GUEST', message: 'Waiting for Guest Diner...' };
+          if (state.uid === event.host.id)
+            return {
+              ...state,
+              openEventId: event.id,
+              status: "WAITING_FOR_GUEST",
+              message: "Waiting for Guest Diner..."
+            };
         }
         console.log("SET_EVENTS", action.events);
         return { ...state, visible: action.events };
@@ -530,32 +571,65 @@ const eventsReducer = (state, action) => {
         sendPushToken({ uid: action.uid });
         return { ...state, uid: action.uid };
       case "CANCEL_USER_STATUS":
-        if (state.status === "WAITING_FOR_GUEST" || state.status === "WAITING_FOR_HOST_REPLY") {
+        if (
+          state.status === "WAITING_FOR_GUEST" ||
+          state.status === "WAITING_FOR_HOST_REPLY"
+        ) {
           (async () => {
             const resp = await request({
-              method: 'POST',
+              method: "POST",
               url: `${SERVER_URI}/events/${state.openEventId}/cancel`
             });
             if (resp.status !== 200) throw new Error(resp.data.error);
           })();
         }
-        return { ...state, openEventId: null, status: null, message: null, visible: state.visible.filter(event => event.host.id !== state.uid) };
+        return {
+          ...state,
+          openEventId: null,
+          status: null,
+          message: null,
+          visible: state.visible.filter(event => event.host.id !== state.uid)
+        };
       case "REMOTE_CANCEL_JOIN_EVENT":
-        NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
-        return { ...state, status: "WAITING_FOR_GUEST", message: "Waiting for Guest Dinner..." };
+        NavigationService.navigate(
+          "MainNavigator",
+          {},
+          NavigationActions.navigate({ routeName: "Map" })
+        );
+        return {
+          ...state,
+          status: "WAITING_FOR_GUEST",
+          message: "Waiting for Guest Dinner..."
+        };
       case "REMOTE_CANCEL_EVENT":
         if (state.openEventId === action.event.id) {
           Alert.alert("Event has been Canceled");
-          NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
-          return { ...state, visible: state.visible.filter(event => event.id !== action.event.id), openEventId: null };
+          NavigationService.navigate(
+            "MainNavigator",
+            {},
+            NavigationActions.navigate({ routeName: "Map" })
+          );
+          return {
+            ...state,
+            visible: state.visible.filter(
+              event => event.id !== action.event.id
+            ),
+            openEventId: null
+          };
         }
-        return { ...state, visible: state.visible.filter(event => event.id !== action.event.id) };
+        return {
+          ...state,
+          visible: state.visible.filter(event => event.id !== action.event.id)
+        };
       case "REMOTE_FINISH_EVENT":
-        return { ...state, visible: state.visible.filter(event => event.id !== action.event.id) };
+        return {
+          ...state,
+          visible: state.visible.filter(event => event.id !== action.event.id)
+        };
       case "REMOTE_JOIN_RESPONSE":
         if (action.accept) {
           Alert.alert("Your dining request has been accepted!");
-          NavigationService.navigate('Dining');
+          NavigationService.navigate("Dining");
           fetchRestaurantDetail({ restaurantId: action.event.restaurant.id });
           return { ...state, status: "DINING", message: null };
         } else {
@@ -563,11 +637,15 @@ const eventsReducer = (state, action) => {
           return { ...state, openEventId: null, status: null, message: null };
         }
       case "CREATE_EVENT":
-        return { ...state, status: "WAITING_FOR_GUEST", message: "Waiting for Guest Dinner..." };
+        return {
+          ...state,
+          status: "WAITING_FOR_GUEST",
+          message: "Waiting for Guest Dinner..."
+        };
       case "FETCH_EVENTS":
         (async () => {
           const resp = await request({
-            method: 'GET',
+            method: "GET",
             url: `${SERVER_URI}/events/`
           });
           if (resp.status !== 200) throw new Error(resp.data.error);
@@ -587,15 +665,15 @@ const eventsReducer = (state, action) => {
       case "ACCEPT_MATCH_REQUEST":
         console.log("ACCEPT MATCH REQUEST", state);
         (async () => {
-          try {            
+          try {
             const resp = await request({
-              method: 'POST',
+              method: "POST",
               url: `${SERVER_URI}/events/${state.openEventId}/accept`
             });
-            NavigationService.navigate('Dining');
+            NavigationService.navigate("Dining");
             if (resp.status !== 200) throw new Error(resp.data.error);
           } catch (err) {
-            console.log("event/accept error", err)
+            console.log("event/accept error", err);
           }
         })();
         return state;
@@ -604,16 +682,24 @@ const eventsReducer = (state, action) => {
         (async () => {
           try {
             const resp = await request({
-              method: 'POST',
+              method: "POST",
               url: `${SERVER_URI}/events/${state.openEventId}/reject`
             });
-            NavigationService.navigate('MainNavigator', {}, NavigationActions.navigate({ routeName: "Map" }));
+            NavigationService.navigate(
+              "MainNavigator",
+              {},
+              NavigationActions.navigate({ routeName: "Map" })
+            );
             if (resp.status !== 200) throw new Error(resp.data.error);
           } catch (err) {
-            console.log("event/reject error", err)
+            console.log("event/reject error", err);
           }
         })();
-        return { ...state, status: "WAITING_FOR_GUEST", message: "Waiting for Guest Dinner..." };
+        return {
+          ...state,
+          status: "WAITING_FOR_GUEST",
+          message: "Waiting for Guest Dinner..."
+        };
       case "SET_OPEN_RESTAURANT_NAME":
         fetchRestaurantDetail({ restaurantName: action.restaurantName });
         return state;
@@ -622,7 +708,7 @@ const eventsReducer = (state, action) => {
         (async () => {
           try {
             const resp = await request({
-              method: 'POST',
+              method: "POST",
               url: `${SERVER_URI}/events/${state.openEventId}/join`
             });
             if (resp.status !== 200) throw new Error(resp.data.error);
@@ -630,7 +716,11 @@ const eventsReducer = (state, action) => {
             console.log("Error while joining event", err);
           }
         })();
-        return { ...state, status: "WAITING_FOR_HOST_REPLY", message: 'Your Dinning Request has been sent!' };
+        return {
+          ...state,
+          status: "WAITING_FOR_HOST_REPLY",
+          message: "Your Dinning Request has been sent!"
+        };
       case "CLOSE_EVENT_DETAIL_SCREEN":
         return { ...state, openEventId: null };
       default:
