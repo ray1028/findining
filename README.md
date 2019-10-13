@@ -29,7 +29,7 @@ Camera screen to take pictures of restaurant signs <br/><br/>
 The application then highlights the restaurant signs for user to select <br/><br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/camera2.jpg" width=300 height=600 />
 
-Base on the user's selection, a menu item screen will be display to the user <br/><br/>
+Base on the user's selection, restaurant's info screen will be display to the user <br/><br/>
 <img src="https://github.com/ray1028/findining/blob/master/docs/menu.jpg" width=300 height=600 />
 
 User can then create an event and wait for others to join them <br/><br/>
