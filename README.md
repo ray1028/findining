@@ -41,8 +41,8 @@ User can then create an event and wait for others to join them <br/><br/>
 
 Findining is a social dining app that connects people together with the same hobbies and interests.IT allows users to take a picture of a restaurant sign then using AWS rekognition to retrieve the menu from the restaurant to display back the the user. Users will be able to create an event that will show your location to other users interested in sharing a dining experience with you.
 
-Front End: React Native, Expo (managed), Firebase, Redux
-Back End: AWS (S3, Rekognition), Postgres, Redis, Ruby, Rails, ActiveRecord (ORM)
+Front End: React Native(Interface), Expo (managed), Firebase(FCM Push notification), Redux(State Management) </br>
+Back End: AWS (S3, Text Rekognition), Postgres(Database), Redis(Session token), Ruby(Back-end Language), Rails(Api-server, ActiveRecord (ORM)
 
 ## Setup
 
