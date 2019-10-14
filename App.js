@@ -308,12 +308,16 @@ const userProfileStateReducer = (state, action) => {
       genderChecked: null,
       uid: null,
       id: null,
-      userImage: null
+      userImage: null,
+      userImageBase64: null
     };
 
   switch (action.type) {
     case "SET_USER_IMAGE_URI":
       return { ...state, userImage: action.value };
+
+    case "SET_USER_IMAGE_BASE_64":
+      return { ...state, userImageBase64: action.value };
 
     case "ACTION_FETCH_USER_PROFILE":
       (async () => {
@@ -340,9 +344,7 @@ const userProfileStateReducer = (state, action) => {
         });
         store.dispatch({
           type: "SET_USER_IMAGE_URI",
-          // value: userProfile.profile_uri
-          value:
-            "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
+          value: userProfile.profile_uri
         });
       })();
       return { ...state, id: action.value };
@@ -409,8 +411,6 @@ const userProfileStateReducer = (state, action) => {
             throw new Error("Error while posting user_interests");
           }
 
-          console.log("before save image in SAVE_PROFILE " + state.userImage);
-
           if (state.username || state.genderChecked) {
             (async () => {
               const newUserProfileResp = await request({
@@ -421,9 +421,9 @@ const userProfileStateReducer = (state, action) => {
                     id: state.uid || state.id,
                     username: state.username,
                     user_gender: state.genderChecked,
-                    // profile_uri: state.userImage
-                    profile_uri:
-                      "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
+                    profile_uri: state.userImageBase64
+                    // profile_uri:
+                    //   "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
                   }
                 }
               });

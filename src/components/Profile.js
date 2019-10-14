@@ -119,6 +119,8 @@ const Profile = ({
   saveProfile,
   userImage,
   dispatchUpdateUserImage,
+  dispatchUpdateUserBase64,
+  userImageBase64,
   // current logged in user and user interestss
   // allInterests,
   currentUserAndInterests
@@ -138,14 +140,17 @@ const Profile = ({
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3]
+      aspect: [4, 3],
+      base64: true,
+      exif: true
     });
 
     if (!result.cancelled) {
       dispatchUpdateUserImage(result.uri);
+      dispatchUpdateUserBase64(result.base64);
     }
   };
-  console.log("current image is " + userImage);
+
   return (
     <View style={styles.profileContainer}>
       <View style={styles.topContainer}>
@@ -160,9 +165,9 @@ const Profile = ({
         >
           <TouchableWithoutFeedback onPress={() => _pickImage()}>
             <BadgedIcon
-              // source={require("../assets/images/ray.png")}
-              // source={userImage}
-              source={{ uri: userImage }}
+              source={{
+                uri: userImage
+              }}
               rounded
               size={170}
             />
@@ -357,6 +362,11 @@ const mapDispatchToProps = dispatch => {
       dispatch({
         type: "SET_USER_IMAGE_URI",
         value: uri
+      }),
+    dispatchUpdateUserBase64: base64 =>
+      dispatch({
+        type: "SET_USER_IMAGE_BASE_64",
+        value: base64
       })
   };
 };
